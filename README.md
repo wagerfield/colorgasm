@@ -1,6 +1,10 @@
-# Colorgasm
+# COLORGASM
 
-> WebAudio Visualiser inspired by Nina Geometrieva's Colorgasm. [***Check it out here!***][site]
+> WebAudio Visualiser inspired by Nina Geometrieva's Colorgasm.
+
+### [*Sex up some sound here!*][site]
+
+![COLORGASM][screenshot]
 
 ## Credits
 
@@ -18,3 +22,4 @@ Licensed under [MIT][mit]. Enjoy.
 [twitter]: http://twitter.com/wagerfield
 [mit]: http://www.opensource.org/licenses/mit-license.php
 [nina]: https://www.behance.net/gallery/14750607/Colorgasm
+[screenshot]: assets/images/screenshot.png
