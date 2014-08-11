@@ -1,0 +1,14 @@
+/* TEAM */
+
+Developer & Designer: Matthew Wagerfield
+Site: http://matthew.wagerfield.com
+Location: London
+Twitter: @wagerfield
+Behance: @wagerfield
+GitHub: @wagerfield
+
+/* SITE */
+
+Last Update: 2014/08/10
+Standards: HTML5, CSS3
+Software: Sublime Text 3
