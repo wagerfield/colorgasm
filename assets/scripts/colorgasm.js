@@ -13,19 +13,19 @@
     '#1E1A31', // Base
     '#FFFFFF', // Core
   [
-    '#6B2A64',
-    '#B14B77',
-    '#E2687C',
-    '#F98A75',
+    '#FFE193',
     '#FFB46B',
-    '#FFE193'
+    '#F98A75',
+    '#E2687C',
+    '#B14B77',
+    '#6B2A64'
   ],[
-    '#4C4690',
-    '#4D64B0',
-    '#518CBE',
-    '#5BAFCD',
+    '#B9F7F5',
     '#72D4E2',
-    '#B9F7F5'
+    '#5BAFCD',
+    '#518CBE',
+    '#4D64B0',
+    '#4C4690'
   ]);
 
   Sketch.create({
@@ -41,13 +41,12 @@
     setColorPalette: function(palette) {
       if (this.palette !== palette) {
         this.palette = palette;
-        console.log(this);
         this.container.style.backgroundColor = palette.base;
       }
     },
 
     reset: function() {
-      this.wave = [Math.random()];
+      this.wave = [0];
     },
 
     resize: function() {
@@ -61,21 +60,28 @@
       value = Math.max(value, 0);
       value = Math.min(value, 1);
       this.wave.push(value);
-      if (this.wave.length > 100) {
+      if (this.wave.length > this.height / 2) {
         this.wave.shift();
       }
     },
 
     draw: function() {
-      var i, l;
-      for (i = 0, l = this.palette.west.length; i < l; i++) {
+      var i, l,
+          MIN = 0.1,
+          MAX = 0.8,
+          STEP = 2,
+          RANGE = MAX - MIN;
+
+      for (i = l = this.palette.east.length; i > 0; i--) {
+        // this.drawWave(WEST, MIN + RANGE * i / l, STEP, this.palette.west[i-1]);
       }
-      for (i = 0, l = this.palette.east.length; i < l; i++) {
+      for (i = l = this.palette.east.length; i > 0; i--) {
+        this.drawWave(EAST, MIN + RANGE * i / l, STEP, this.palette.east[i-1]);
       }
-      this.drawWave(WEST, 0.8, 20, this.palette.core);
+      this.drawWave(CORE, MIN, STEP, this.palette.core);
     },
 
-    drawWave: function(state, scale, step, color) {
+    drawWave: function(mode, scale, step, color) {
       var c1x, c1y, c2x, c2y;
       var i = this.wave.length - 1;
       var x = Math.round(this.center + this.center * this.wave[i] * scale);
