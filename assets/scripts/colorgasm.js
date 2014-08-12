@@ -2,7 +2,6 @@
 
   var WEST = 'west',
       EAST = 'east',
-      CORE = 'core',
       COLORS = {};
 
   function addColorPalette(id, base, core, west, east) {
@@ -86,7 +85,7 @@
       var c1x, c1y, c2x, c2y;
       var i = this.wave.length - 1;
       var offset = mode === WEST ? -this.center : this.center;
-      var x = Math.round(this.center + offset * this.wave[i] * scale);
+      var x = Math.round(this.center + offset * scale * this.wave[i]);
       var y = this.height;
       this.beginPath();
       this.moveTo(this.center, y);
@@ -94,7 +93,7 @@
       for (i; i >= 0; i--) {
         c1x = x;
         c1y = y - step * 0.5;
-        c2x = Math.round(this.center + offset * this.wave[i] * scale);
+        c2x = Math.round(this.center + offset * scale * this.wave[i]);
         c2y = y - step * 0.5;
         y = y - step;
         x = c2x;
