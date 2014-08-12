@@ -73,10 +73,10 @@
           RANGE = MAX - MIN;
 
       for (i = l = this.palette.east.length; i > 0; i--) {
-        // this.drawWave(WEST, MIN + RANGE * i / l, STEP, this.palette.west[i-1]);
+        this.drawWave(WEST, MIN + RANGE * i / l, STEP, this.palette.west[i-1]);
       }
       for (i = l = this.palette.east.length; i > 0; i--) {
-        this.drawWave(EAST, MIN + RANGE * i / l, STEP, this.palette.east[i-1]);
+        // this.drawWave(EAST, MIN + RANGE * i / l, STEP, this.palette.east[i-1]);
       }
       this.drawWave(CORE, MIN, STEP, this.palette.core);
     },
