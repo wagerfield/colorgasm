@@ -59,16 +59,16 @@
       value = Math.max(value, 0);
       value = Math.min(value, 1);
       this.wave.push(value);
-      if (this.wave.length > this.height / 2) {
+      if (this.wave.length > this.height / 4) {
         this.wave.shift();
       }
     },
 
     draw: function() {
       var i, l,
+          STEP = 4,
           MIN = 0.1,
           MAX = 0.8,
-          STEP = 2,
           RANGE = MAX - MIN;
 
       for (i = l = this.palette.east.length; i > 0; i--) {
