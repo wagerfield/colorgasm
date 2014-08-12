@@ -56,7 +56,7 @@
     update: function() {
       var sign = Math.random() > 0.5 ? 1 : -1;
       var value = this.wave[this.wave.length-1];
-      value += Math.random() * sign * 0.05;
+      value += Math.random() * sign * 0.08;
       value = Math.max(value, 0);
       value = Math.min(value, 1);
       this.wave.push(value);
