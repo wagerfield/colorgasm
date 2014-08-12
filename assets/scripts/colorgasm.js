@@ -1,17 +1,15 @@
 (function(window) {
 
-  var COLORS = [];
+  var COLORS = {};
 
   function addColorPalette(id, base, core, west, east) {
-    var palette = {
-      base: base,
-      core: core,
-      east: east,
-      west: west
-    };
+    COLORS[id] = {base:base, core:core, west:west, east:east};
   }
 
-  addColorPalette('#1E1A31', '#FFFFFF', [
+  addColorPalette('main',
+    '#1E1A31', // Base
+    '#FFFFFF', // Core
+  [
     '#6B2A64',
     '#B14B77',
     '#E2687C',
@@ -31,15 +29,18 @@
 
     setup: function() {
       this.container = document.getElementById('container');
-      this.container.style.backgroundColor = COLOURS
+      this.container.style.backgroundColor = COLORS.main.base;
+      this.reset();
+    },
+
+    reset: function() {
+      this.wave = [];
     },
 
     update: function() {
     },
 
     draw: function() {
-      this.fillStyle = 'red';
-      this.fillRect(0, 0, this.width, this.height);
     }
 
   });
