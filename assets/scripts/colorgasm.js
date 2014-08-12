@@ -76,15 +76,17 @@
         this.drawWave(WEST, MIN + RANGE * i / l, STEP, this.palette.west[i-1]);
       }
       for (i = l = this.palette.east.length; i > 0; i--) {
-        // this.drawWave(EAST, MIN + RANGE * i / l, STEP, this.palette.east[i-1]);
+        this.drawWave(EAST, MIN + RANGE * i / l, STEP, this.palette.east[i-1]);
       }
-      this.drawWave(CORE, MIN, STEP, this.palette.core);
+      this.drawWave(WEST, MIN, STEP, this.palette.core);
+      this.drawWave(EAST, MIN, STEP, this.palette.core);
     },
 
     drawWave: function(mode, scale, step, color) {
       var c1x, c1y, c2x, c2y;
       var i = this.wave.length - 1;
-      var x = Math.round(this.center + this.center * this.wave[i] * scale);
+      var offset = mode === WEST ? -this.center : this.center;
+      var x = Math.round(this.center + offset * this.wave[i] * scale);
       var y = this.height;
       this.beginPath();
       this.moveTo(this.center, y);
@@ -92,7 +94,7 @@
       for (i; i >= 0; i--) {
         c1x = x;
         c1y = y - step * 0.5;
-        c2x = Math.round(this.center + this.center * this.wave[i] * scale);
+        c2x = Math.round(this.center + offset * this.wave[i] * scale);
         c2y = y - step * 0.5;
         y = y - step;
         x = c2x;
