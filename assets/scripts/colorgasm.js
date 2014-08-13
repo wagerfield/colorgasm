@@ -104,7 +104,39 @@
       this.closePath();
       this.fillStyle = color;
       this.fill();
+    },
+
+    catmullRom: function(points) {
+
+      if (points.length < 3) return;
+
+      var p0, p1, p2, p3,
+          i6 = 1.0 / 6.0,
+          ox = points[0].x,
+          oy = points[0].y;
+
+      for (var i = 3, n = points.length; i < n; i++) {
+
+        p0 = points[i-3];
+        p1 = points[i-2];
+        p2 = points[i-1];
+        p3 = points[i];
+
+        this.beginPath();
+        this.moveTo(ox, oy);
+        this.bezierCurveTo(
+          p2.x *  i6 + p1.x - p0.x * i6,
+          p2.y *  i6 + p1.y - p0.y * i6,
+          p3.x * -i6 + p2.x + p1.x * i6,
+          p3.y * -i6 + p2.y + p1.y * i6,
+          ox = p2.x,
+          oy = p2.y
+        );
+        this.lineWidth = 1;
+        this.stroke();
+      }
     }
+
   });
 
 })(window);
