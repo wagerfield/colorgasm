@@ -71,14 +71,23 @@
           MAX = 0.8,
           RANGE = MAX - MIN;
 
-      for (i = l = this.palette.east.length; i > 0; i--) {
-        this.drawWave(WEST, MIN + RANGE * i / l, STEP, this.palette.west[i-1]);
-      }
-      for (i = l = this.palette.east.length; i > 0; i--) {
-        this.drawWave(EAST, MIN + RANGE * i / l, STEP, this.palette.east[i-1]);
-      }
-      this.drawWave(WEST, MIN, STEP, this.palette.core);
-      this.drawWave(EAST, MIN, STEP, this.palette.core);
+      this.catmullRom([
+        {x:this.width * 0.00, y:0},
+        {x:this.width * 0.25, y:500},
+        {x:this.width * 0.75, y:500},
+        {x:this.width * 1.00, y:0}
+      ]);
+      this.strokeStyle = 'red';
+      this.stroke();
+
+      // for (i = l = this.palette.east.length; i > 0; i--) {
+      //   this.drawWave(WEST, MIN + RANGE * i / l, STEP, this.palette.west[i-1]);
+      // }
+      // for (i = l = this.palette.east.length; i > 0; i--) {
+      //   this.drawWave(EAST, MIN + RANGE * i / l, STEP, this.palette.east[i-1]);
+      // }
+      // this.drawWave(WEST, MIN, STEP, this.palette.core);
+      // this.drawWave(EAST, MIN, STEP, this.palette.core);
     },
 
     drawWave: function(mode, scale, step, color) {
@@ -132,8 +141,6 @@
           ox = p2.x,
           oy = p2.y
         );
-        this.lineWidth = 1;
-        this.stroke();
       }
     }
 
