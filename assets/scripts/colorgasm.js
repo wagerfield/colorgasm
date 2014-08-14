@@ -35,7 +35,7 @@
     setup: function() {
 
       // Behaviours
-      this.bezier = false;
+      this.bezier = true;
       this.speed = 3;
       this.frequency = 10;
       this.jitter = 0.15;
@@ -96,7 +96,6 @@
         var delta = point.a - point.v;
         point.p = point.p * this.elasticity + delta * this.friction;
         point.v += point.p;
-        // point.v = point.a;
       }
       this.time++;
     },
@@ -115,12 +114,16 @@
     },
 
     drawWave: function(mode, scale, color) {
-      var t, l, p0, p1, p2, p3,
-          i = this.wave.length - 1,
+      var l = this.wave.length,
+          i = this.bezier ? l - 4 : l - 1;
+
+      if (i < 0) return;
+
+      var t, p0, p1, p2, p3,
           o = mode === WEST ? -this.center : this.center,
+          p = this.wave[i],
           x = this.center,
           y = this.height,
-          p = this.wave[i],
           s = 1.0 / 6.0,
           ox = p.x,
           oy = p.y;
@@ -128,27 +131,24 @@
       // console.log(i, l);
       this.beginPath();
       this.moveTo(x, y);
-      for (l = i - 3; i >= 0; i--) {
+      for (i; i >= 0; i--) {
         p = this.wave[i];
         t = this.time - p.t;
         x = p.x = this.center + o * p.v * scale;
         y = p.y = this.height - t * this.speed;
         if (this.bezier) {
-          if (i < l) {
-            p0 = this.wave[i+3];
-            p1 = this.wave[i+2];
-            p2 = this.wave[i+1];
-            p3 = this.wave[i+0];
-            this.moveTo(ox, oy);
-            this.bezierCurveTo(
-              p2.x *  s + p1.x - p0.x * s,
-              p2.y *  s + p1.y - p0.y * s,
-              p3.x * -s + p2.x + p1.x * s,
-              p3.y * -s + p2.y + p1.y * s,
-              ox = p2.x,
-              oy = p2.y
-            );
-          }
+          p0 = this.wave[i+3];
+          p1 = this.wave[i+2];
+          p2 = this.wave[i+1];
+          p3 = this.wave[i+0];
+          this.bezierCurveTo(
+            p2.x *  s + p1.x - p0.x * s,
+            p2.y *  s + p1.y - p0.y * s,
+            p3.x * -s + p2.x + p1.x * s,
+            p3.y * -s + p2.y + p1.y * s,
+            ox = p2.x,
+            oy = p2.y
+          );
         } else {
           this.lineTo(x, y);
         }
