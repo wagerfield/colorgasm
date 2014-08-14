@@ -35,7 +35,7 @@
     setup: function() {
 
       // Behaviours
-      this.bezier = false;
+      this.smooth = false;
       this.speed = 3;
       this.frequency = 10;
       this.jitter = 0.15;
@@ -46,7 +46,7 @@
 
       // Controls
       this.gui = new dat.GUI();
-      this.gui.add(this, 'bezier');
+      this.gui.add(this, 'smooth');
       this.gui.add(this, 'speed', 0.5, 10);
       this.gui.add(this, 'frequency', 1, 120);
       this.gui.add(this, 'jitter', 0, 1);
@@ -115,7 +115,7 @@
 
     drawWave: function(mode, scale, color) {
       var l = this.wave.length,
-          i = this.bezier ? l - 4 : l - 1;
+          i = this.smooth ? l - 4 : l - 1;
 
       if (i < 0) return;
 
@@ -136,7 +136,7 @@
         t = this.time - p.t;
         x = p.x = this.center + o * p.v * scale;
         y = p.y = this.height - t * this.speed;
-        if (this.bezier) {
+        if (this.smooth) {
           p0 = this.wave[i+3];
           p1 = this.wave[i+2];
           p2 = this.wave[i+1];
