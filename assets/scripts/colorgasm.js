@@ -34,6 +34,7 @@
 
     setup: function() {
       this.setColorPalette(COLORS.main);
+      this.time = 0;
       this.reset();
     },
 
@@ -45,7 +46,7 @@
     },
 
     reset: function() {
-      this.wave = [0];
+      this.wave = [{x:0, y:0, v:0}];
     },
 
     resize: function() {
@@ -53,15 +54,19 @@
     },
 
     update: function() {
-      var sign = Math.random() > 0.5 ? 1 : -1;
-      var value = this.wave[this.wave.length-1];
-      value += Math.random() * sign * 0.08;
-      value = Math.max(value, 0);
-      value = Math.min(value, 1);
-      this.wave.push(value);
-      if (this.wave.length > this.height / 4) {
-        this.wave.shift();
+      if (this.now % 60 === 0) {
+        // var sign = Math.random() > 0.5 ? 1 : -1;
+        // var oldPoint = this.wave[this.wave.length-1];
+        // var newPoint = {x:0, y:0, v:oldPoint.v};
+        // newPoint.v += Math.random() * sign * 0.1;
+        // newPoint.v = Math.max(newPoint.v, 0);
+        // newPoint.v = Math.min(newPoint.v, 1);
+        // this.wave.push(newPoint);
+        // if (this.wave.length > 10) {
+        //   this.wave.shift();
+        // }
       }
+      this.time++;
     },
 
     draw: function() {
@@ -71,48 +76,42 @@
           MAX = 0.8,
           RANGE = MAX - MIN;
 
-      this.catmullRom([
-        {x:this.width * 0.00, y:0},
-        {x:this.width * 0.25, y:500},
-        {x:this.width * 0.75, y:500},
-        {x:this.width * 1.00, y:0}
-      ]);
-      this.strokeStyle = 'red';
-      this.stroke();
-
-      // for (i = l = this.palette.east.length; i > 0; i--) {
-      //   this.drawWave(WEST, MIN + RANGE * i / l, STEP, this.palette.west[i-1]);
-      // }
-      // for (i = l = this.palette.east.length; i > 0; i--) {
-      //   this.drawWave(EAST, MIN + RANGE * i / l, STEP, this.palette.east[i-1]);
-      // }
+      for (i = l = this.palette.east.length; i > 0; i--) {
+        this.drawWave(WEST, MIN + RANGE * i / l, this.palette.west[i-1]);
+      }
+      for (i = l = this.palette.east.length; i > 0; i--) {
+        this.drawWave(EAST, MIN + RANGE * i / l, STEP, this.palette.east[i-1]);
+      }
       // this.drawWave(WEST, MIN, STEP, this.palette.core);
       // this.drawWave(EAST, MIN, STEP, this.palette.core);
     },
 
-    drawWave: function(mode, scale, step, color) {
+    drawWave: function(mode, scale, color) {
       var c1x, c1y, c2x, c2y;
       var i = this.wave.length - 1;
-      var offset = mode === WEST ? -this.center : this.center;
-      var x = Math.round(this.center + offset * scale * this.wave[i]);
-      var y = this.height;
-      this.beginPath();
-      this.moveTo(this.center, y);
-      this.lineTo(x, y);
+      // var offset = mode === WEST ? -this.center : this.center;
+      // var x = Math.round(this.center + offset * scale * this.wave[i]);
+      // var y = this.height;
+      // this.beginPath();
+      // this.moveTo(this.center, y);
+      // this.lineTo(x, y);
       for (i; i >= 0; i--) {
-        c1x = x;
-        c1y = y - step * 0.5;
-        c2x = Math.round(this.center + offset * scale * this.wave[i]);
-        c2y = y - step * 0.5;
-        y = y - step;
-        x = c2x;
-        this.bezierCurveTo(c1x, c1y, c2x, c2y, x, y);
-        if (y < 0) break;
+
+        // console.log(i);
+
+        // c1x = x;
+        // c1y = y - step * 0.5;
+        // c2x = Math.round(this.center + offset * scale * this.wave[i]);
+        // c2y = y - step * 0.5;
+        // y = y - step;
+        // x = c2x;
+        // this.bezierCurveTo(c1x, c1y, c2x, c2y, x, y);
+        // if (y < 0) break;
       }
-      this.lineTo(this.center, y);
-      this.closePath();
-      this.fillStyle = color;
-      this.fill();
+      // this.lineTo(this.center, y);
+      // this.closePath();
+      // this.fillStyle = color;
+      // this.fill();
     },
 
     catmullRom: function(points) {
