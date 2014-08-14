@@ -35,6 +35,7 @@
     setup: function() {
 
       // Behaviours
+      this.bezier = false;
       this.speed = 3;
       this.frequency = 10;
       this.jitter = 0.15;
@@ -45,6 +46,7 @@
 
       // Controls
       this.gui = new dat.GUI();
+      this.gui.add(this, 'bezier');
       this.gui.add(this, 'speed', 0.5, 10);
       this.gui.add(this, 'frequency', 1, 120);
       this.gui.add(this, 'jitter', 0, 1);
@@ -94,6 +96,7 @@
         var delta = point.a - point.v;
         point.p = point.p * this.elasticity + delta * this.friction;
         point.v += point.p;
+        // point.v = point.a;
       }
       this.time++;
     },
@@ -108,23 +111,31 @@
       }
       this.drawWave(WEST, this.core, this.palette.core);
       this.drawWave(EAST, this.core, this.palette.core);
+      // this.drawWave(EAST, 1, this.palette.core);
     },
 
     drawWave: function(mode, scale, color) {
-      var p, t, c1x, c1y, c2x, c2y,
+      var p, t, l, p0, p1, p2, p3, ox, oy,
           i = this.wave.length - 1,
           o = mode === WEST ? -this.center : this.center,
           x = this.center,
-          y = this.height;
+          y = this.height,
+          s = 1.0 / 6.0;
 
+      // console.log(i, l);
       this.beginPath();
       this.moveTo(x, y);
-      for (i; i >= 0; i--) {
+      for (l = i - 3; i >= 0; i--) {
         p = this.wave[i];
         t = this.time - p.t;
-        x = this.center + o * p.v * scale;
-        y = this.height - t * this.speed;
-        this.lineTo(x, y);
+        x = p.x = this.center + o * p.v * scale;
+        y = p.y = this.height - t * this.speed;
+        if (this.bezier) {
+          if (i < l) {
+          }
+        } else {
+          this.lineTo(x, y);
+        }
         if (y < 0) break;
       }
       this.lineTo(this.center, y);
