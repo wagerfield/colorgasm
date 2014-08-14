@@ -35,8 +35,8 @@
     setup: function() {
 
       // Behaviours
-      this.speed = 2;
-      this.frequency = 10;
+      this.speed = 3;
+      this.frequency = 5;
       this.jitter = 0.1;
       this.inertia = 0.95;
       this.friction = 0.01;
