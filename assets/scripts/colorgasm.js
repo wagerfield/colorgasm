@@ -38,6 +38,8 @@
       this.speed = 2;
       this.frequency = 10;
       this.jitter = 0.1;
+      this.inertia = 0.95;
+      this.friction = 0.01;
       this.core = 0.1;
       this.edge = 0.8;
 
@@ -46,6 +48,8 @@
       this.gui.add(this, 'speed', 0.5, 10);
       this.gui.add(this, 'frequency', 1, 120);
       this.gui.add(this, 'jitter', 0, 1);
+      this.gui.add(this, 'inertia', 0, 1);
+      this.gui.add(this, 'friction', 0, 1);
       this.gui.add(this, 'core', 0, 1);
       this.gui.add(this, 'edge', 0, 1);
 
@@ -62,7 +66,7 @@
     },
 
     reset: function() {
-      this.wave = [{a:0, v:0, t:0}];
+      this.wave = [{t:0, a:0, v:0, p:0}];
       this.counter = 0;
       this.time = 0;
     },
@@ -75,7 +79,7 @@
       if (++this.counter >= this.frequency) {
         var sign = Math.random() > 0.5 ? 1 : -1;
         var oldPoint = this.wave[this.wave.length-1];
-        var newPoint = {a:oldPoint.a, v:0, t:this.time};
+        var newPoint = {t:this.time, a:oldPoint.a, v:0, p:0};
         newPoint.a += Math.random() * sign * this.jitter;
         newPoint.a = Math.max(newPoint.a, 0);
         newPoint.a = Math.min(newPoint.a, 1);
@@ -84,6 +88,12 @@
           this.wave.shift();
         }
         this.counter = 0;
+      }
+      for (var i = this.wave.length - 1; i >= 0; i--) {
+        var point = this.wave[i];
+        var delta = point.a - point.v;
+        point.p = point.p * this.inertia + delta * this.friction;
+        point.v += point.p;
       }
       this.time++;
     },
@@ -111,7 +121,7 @@
       this.moveTo(x, y);
       for (i; i >= 0; i--) {
         p = this.wave[i];
-        x = this.center + o * p.a * scale;
+        x = this.center + o * p.v * scale;
         y = this.height - (this.time - p.t) * this.speed;
         this.lineTo(x, y);
       }
