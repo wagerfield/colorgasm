@@ -35,11 +35,10 @@
     setup: function() {
 
       // Behaviours
-      this.speed = 2;
+      this.speed = 4;
       this.frequency = 60;
 
       this.setColorPalette(COLORS.main);
-      this.time = 0;
       this.reset();
     },
 
@@ -51,7 +50,8 @@
     },
 
     reset: function() {
-      this.wave = [{a:0, v:0}];
+      this.wave = [{a:1, v:0, t:0}];
+      this.time = 0;
     },
 
     resize: function() {
@@ -59,10 +59,10 @@
     },
 
     update: function() {
-      if (this.now % this.frequency === 0) {
+      if (this.time % this.frequency === 0) {
         var sign = Math.random() > 0.5 ? 1 : -1;
         var oldPoint = this.wave[this.wave.length-1];
-        var newPoint = {a:oldPoint.a, v:0};
+        var newPoint = {a:oldPoint.a, v:0, t:this.time};
         newPoint.a += Math.random() * sign * 0.5;
         newPoint.a = Math.max(newPoint.a, 0);
         newPoint.a = Math.min(newPoint.a, 1);
@@ -102,7 +102,7 @@
       for (i; i >= 0; i--) {
         p = this.wave[i];
         x = this.center + o * p.a * scale;
-        y = this.height - (this.time * this.speed) + (this.frequency * this.speed * i);
+        y = this.height - (this.time - p.t) * this.speed;
         this.lineTo(x, y);
       }
       this.lineTo(this.center, y);
