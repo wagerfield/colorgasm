@@ -35,9 +35,9 @@
     setup: function() {
 
       // Behaviours
-      this.speed = 2.5;
-      this.frequency = 30;
-      this.jitter = 0.2;
+      this.speed = 2;
+      this.frequency = 10;
+      this.jitter = 0.1;
 
       // Controls
       this.gui = new dat.GUI();
