@@ -35,7 +35,7 @@
     setup: function() {
 
       // Behaviours
-      this.bezier = true;
+      this.bezier = false;
       this.speed = 3;
       this.frequency = 10;
       this.jitter = 0.15;
