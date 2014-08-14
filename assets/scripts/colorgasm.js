@@ -115,12 +115,15 @@
     },
 
     drawWave: function(mode, scale, color) {
-      var p, t, l, p0, p1, p2, p3, ox, oy,
+      var t, l, p0, p1, p2, p3,
           i = this.wave.length - 1,
           o = mode === WEST ? -this.center : this.center,
           x = this.center,
           y = this.height,
-          s = 1.0 / 6.0;
+          p = this.wave[i],
+          s = 1.0 / 6.0,
+          ox = p.x,
+          oy = p.y;
 
       // console.log(i, l);
       this.beginPath();
@@ -132,6 +135,19 @@
         y = p.y = this.height - t * this.speed;
         if (this.bezier) {
           if (i < l) {
+            p0 = this.wave[i+3];
+            p1 = this.wave[i+2];
+            p2 = this.wave[i+1];
+            p3 = this.wave[i+0];
+            this.moveTo(ox, oy);
+            this.bezierCurveTo(
+              p2.x *  s + p1.x - p0.x * s,
+              p2.y *  s + p1.y - p0.y * s,
+              p3.x * -s + p2.x + p1.x * s,
+              p3.y * -s + p2.y + p1.y * s,
+              ox = p2.x,
+              oy = p2.y
+            );
           }
         } else {
           this.lineTo(x, y);
