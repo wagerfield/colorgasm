@@ -35,9 +35,17 @@
     setup: function() {
 
       // Behaviours
-      this.speed = 4;
-      this.frequency = 60;
+      this.speed = 2.5;
+      this.frequency = 30;
+      this.jitter = 0.2;
 
+      // Controls
+      this.gui = new dat.GUI();
+      this.gui.add(this, 'speed', 0.5, 10);
+      this.gui.add(this, 'frequency', 1, 120);
+      this.gui.add(this, 'jitter', 0, 1);
+
+      // Setup
       this.setColorPalette(COLORS.main);
       this.reset();
     },
@@ -50,7 +58,8 @@
     },
 
     reset: function() {
-      this.wave = [{a:1, v:0, t:0}];
+      this.wave = [{a:0, v:0, t:0}];
+      this.counter = 0;
       this.time = 0;
     },
 
@@ -59,17 +68,18 @@
     },
 
     update: function() {
-      if (this.time % this.frequency === 0) {
+      if (++this.counter >= this.frequency) {
         var sign = Math.random() > 0.5 ? 1 : -1;
         var oldPoint = this.wave[this.wave.length-1];
         var newPoint = {a:oldPoint.a, v:0, t:this.time};
-        newPoint.a += Math.random() * sign * 0.5;
+        newPoint.a += Math.random() * sign * this.jitter;
         newPoint.a = Math.max(newPoint.a, 0);
         newPoint.a = Math.min(newPoint.a, 1);
         this.wave.push(newPoint);
         if (this.wave.length > 100) {
           this.wave.shift();
         }
+        this.counter = 0;
       }
       this.time++;
     },
