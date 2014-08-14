@@ -36,12 +36,12 @@
 
       // Behaviours
       this.speed = 3;
-      this.frequency = 5;
-      this.jitter = 0.1;
+      this.frequency = 10;
+      this.jitter = 0.15;
       this.inertia = 0.95;
       this.friction = 0.01;
       this.core = 0.1;
-      this.edge = 0.8;
+      this.edge = 0.6;
 
       // Controls
       this.gui = new dat.GUI();
@@ -49,7 +49,7 @@
       this.gui.add(this, 'frequency', 1, 120);
       this.gui.add(this, 'jitter', 0, 1);
       this.gui.add(this, 'inertia', 0, 1);
-      this.gui.add(this, 'friction', 0, 1);
+      this.gui.add(this, 'friction', 0, 0.2);
       this.gui.add(this, 'core', 0, 1);
       this.gui.add(this, 'edge', 0, 1);
 
@@ -84,7 +84,7 @@
         newPoint.a = Math.max(newPoint.a, 0);
         newPoint.a = Math.min(newPoint.a, 1);
         this.wave.push(newPoint);
-        if (this.wave.length > 100) {
+        if (this.wave.length > this.height) {
           this.wave.shift();
         }
         this.counter = 0;
@@ -111,7 +111,7 @@
     },
 
     drawWave: function(mode, scale, color) {
-      var p, c1x, c1y, c2x, c2y,
+      var p, t, c1x, c1y, c2x, c2y,
           i = this.wave.length - 1,
           o = mode === WEST ? -this.center : this.center,
           x = this.center,
@@ -121,9 +121,11 @@
       this.moveTo(x, y);
       for (i; i >= 0; i--) {
         p = this.wave[i];
+        t = this.time - p.t;
         x = this.center + o * p.v * scale;
-        y = this.height - (this.time - p.t) * this.speed;
+        y = this.height - t * this.speed;
         this.lineTo(x, y);
+        if (y < 0) break;
       }
       this.lineTo(this.center, y);
       this.closePath();
