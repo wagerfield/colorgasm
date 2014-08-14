@@ -27,15 +27,6 @@
     '#4C4690'
   ]);
 
-  addColorPalette('test',
-    '#000000', // Base
-    '#FFFFFF', // Core
-  [
-    '#FF0000'
-  ],[
-    '#0000FF'
-  ]);
-
   Sketch.create({
 
     interval: 1,
