@@ -34,9 +34,9 @@
 
     setup: function() {
 
-      // Constants
-      this.SPEED = -2;
-      this.FREQUENCY = 60;
+      // Behaviours
+      this.speed = -2;
+      this.frequency = 60;
 
       this.setColorPalette(COLORS.main);
       this.time = 0;
@@ -51,7 +51,7 @@
     },
 
     reset: function() {
-      this.wave = [{a:1, v:0}];
+      this.wave = [{a:0, v:0}];
     },
 
     resize: function() {
@@ -59,36 +59,35 @@
     },
 
     update: function() {
-      if (this.now % this.FREQUENCY === 0) {
-        // var sign = Math.random() > 0.5 ? 1 : -1;
-        // var oldPoint = this.wave[this.wave.length-1];
-        // var newPoint = {a:oldPoint.a, v:0};
-        // newPoint.a += Math.random() * sign * 0.1;
-        // newPoint.a = Math.max(newPoint.a, 0);
-        // newPoint.a = Math.min(newPoint.a, 1);
-        // this.wave.push(newPoint);
-        // if (this.wave.length > 10) {
-        //   this.wave.shift();
-        // }
+      if (this.now % this.frequency === 0) {
+        var sign = Math.random() > 0.5 ? 1 : -1;
+        var oldPoint = this.wave[this.wave.length-1];
+        var newPoint = {a:oldPoint.a, v:0};
+        newPoint.a += Math.random() * sign * 0.1;
+        newPoint.a = Math.max(newPoint.a, 0);
+        newPoint.a = Math.min(newPoint.a, 1);
+        this.wave.push(newPoint);
+        if (this.wave.length > 10) {
+          this.wave.shift();
+        }
       }
       this.time++;
     },
 
     draw: function() {
       var i, l,
-          MIN = 0,
-          MAX = 1,
+          MIN = 0.1,
+          MAX = 0.8,
           RANGE = MAX - MIN;
 
       for (i = l = this.palette.east.length; i > 0; i--) {
-        // this.drawWave(WEST, MIN + RANGE * i / l, this.palette.west[i-1]);
+        this.drawWave(WEST, MIN + RANGE * i / l, this.palette.west[i-1]);
       }
       for (i = l = this.palette.east.length; i > 0; i--) {
-        // this.drawWave(EAST, MIN + RANGE * i / l, this.palette.east[i-1]);
+        this.drawWave(EAST, MIN + RANGE * i / l, this.palette.east[i-1]);
       }
-      this.drawWave(WEST, 1, this.palette.core);
-      // this.drawWave(WEST, MIN, this.palette.core);
-      // this.drawWave(EAST, MIN, this.palette.core);
+      this.drawWave(WEST, MIN, this.palette.core);
+      this.drawWave(EAST, MIN, this.palette.core);
     },
 
     drawWave: function(mode, scale, color) {
@@ -103,7 +102,7 @@
       for (i; i >= 0; i--) {
         p = this.wave[i];
         x = this.center + o * p.a * scale;
-        y = this.time * this.SPEED + this.height;
+        y = this.time * this.speed + this.height;
         this.lineTo(x, y);
       }
       this.lineTo(this.center, y);
