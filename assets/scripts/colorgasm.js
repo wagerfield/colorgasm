@@ -38,12 +38,16 @@
       this.speed = 2;
       this.frequency = 10;
       this.jitter = 0.1;
+      this.core = 0.1;
+      this.edge = 0.8;
 
       // Controls
       this.gui = new dat.GUI();
       this.gui.add(this, 'speed', 0.5, 10);
       this.gui.add(this, 'frequency', 1, 120);
       this.gui.add(this, 'jitter', 0, 1);
+      this.gui.add(this, 'core', 0, 1);
+      this.gui.add(this, 'edge', 0, 1);
 
       // Setup
       this.setColorPalette(COLORS.main);
@@ -85,19 +89,15 @@
     },
 
     draw: function() {
-      var i, l,
-          MIN = 0.1,
-          MAX = 0.8,
-          RANGE = MAX - MIN;
-
+      var i, l, RANGE = this.edge - this.core;
       for (i = l = this.palette.east.length; i > 0; i--) {
-        this.drawWave(WEST, MIN + RANGE * i / l, this.palette.west[i-1]);
+        this.drawWave(WEST, this.core + RANGE * i / l, this.palette.west[i-1]);
       }
       for (i = l = this.palette.east.length; i > 0; i--) {
-        this.drawWave(EAST, MIN + RANGE * i / l, this.palette.east[i-1]);
+        this.drawWave(EAST, this.core + RANGE * i / l, this.palette.east[i-1]);
       }
-      this.drawWave(WEST, MIN, this.palette.core);
-      this.drawWave(EAST, MIN, this.palette.core);
+      this.drawWave(WEST, this.core, this.palette.core);
+      this.drawWave(EAST, this.core, this.palette.core);
     },
 
     drawWave: function(mode, scale, color) {
