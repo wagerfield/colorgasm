@@ -1,7 +1,7 @@
 (function(window) {
 
-  var WEST = 'west',
-      EAST = 'east',
+  var WEST = 0,
+      EAST = 1,
       COLORS = {};
 
   function addColorPalette(id, base, core, west, east) {
@@ -41,6 +41,7 @@
       this.jitter = 0.15;
       this.lubricity = 0.01;
       this.elasticity = 0.95;
+      this.offset = this.frequency * this.speed;
       this.core = 0.1;
       this.edge = 0.6;
 
@@ -52,6 +53,7 @@
       this.gui.add(this, 'jitter', 0, 1);
       this.gui.add(this, 'lubricity', 0, 0.2);
       this.gui.add(this, 'elasticity', 0, 1);
+      this.gui.add(this, 'offset', -100, 100);
       this.gui.add(this, 'core', 0, 1);
       this.gui.add(this, 'edge', 0, 1);
 
@@ -68,7 +70,9 @@
     },
 
     reset: function() {
-      this.wave = [{t:0, a:0, v:0, p:0}];
+      this.path = [];
+      this.spline = [];
+      this.wave = [{t:0, a:0, v:0, p:0, x:0, y:0}];
       this.counter = 0;
       this.time = 0;
     },
@@ -91,13 +95,19 @@
         }
         this.counter = 0;
       }
-      for (var i = this.wave.length - 1; i >= 0; i--) {
-        var point = this.wave[i];
-        var delta = point.a - point.v;
-        point.p = point.p * this.elasticity + delta * this.lubricity;
+      _.each(this.wave, function(point) {
+        point.p = point.p * this.elasticity + (point.a - point.v) * this.lubricity;
         point.v += point.p;
-      }
+        point.v = Math.max(0, point.v);
+        point.v = Math.min(1, point.v);
+        point.x = this.center * point.v;
+        point.y = this.height + this.offset - (this.time - point.t) * this.speed;
+      }, this);
       this.time++;
+    },
+
+    updateSpline: function() {
+      this.spline = this.catmullRom();
     },
 
     draw: function() {
@@ -110,54 +120,60 @@
       }
       this.drawWave(WEST, this.core, this.palette.core);
       this.drawWave(EAST, this.core, this.palette.core);
-      // this.drawWave(EAST, 1, this.palette.core);
     },
 
     drawWave: function(mode, scale, color) {
-      var l = this.wave.length,
-          i = this.smooth ? l - 4 : l - 1;
-
-      if (i < 0) return;
-
-      var t, p0, p1, p2, p3,
-          o = mode === WEST ? -this.center : this.center,
-          p = this.wave[i],
-          x = this.center,
-          y = this.height,
-          s = 1.0 / 6.0,
-          ox = p.x,
-          oy = p.y;
-
-      // console.log(i, l);
+      var x = 0;
+      this.save();
       this.beginPath();
-      this.moveTo(x, y);
-      for (i; i >= 0; i--) {
-        p = this.wave[i];
-        t = this.time - p.t;
-        x = p.x = this.center + o * p.v * scale;
-        y = p.y = this.height - t * this.speed;
-        if (this.smooth) {
-          p0 = this.wave[i+3];
-          p1 = this.wave[i+2];
-          p2 = this.wave[i+1];
-          p3 = this.wave[i+0];
-          this.bezierCurveTo(
-            p2.x *  s + p1.x - p0.x * s,
-            p2.y *  s + p1.y - p0.y * s,
-            p3.x * -s + p2.x + p1.x * s,
-            p3.y * -s + p2.y + p1.y * s,
-            ox = p2.x,
-            oy = p2.y
-          );
-        } else {
-          this.lineTo(x, y);
-        }
-        if (y < 0) break;
-      }
-      this.lineTo(this.center, y);
+      this.translate(this.center, 0);
+      this.moveTo(0, _.first(this.wave).y);
+      _.each(this.wave, function(point) {
+        x = mode ? point.x : -point.x;
+        this.lineTo(x * scale, point.y);
+      }, this);
+      this.lineTo(0, _.last(this.wave).y);
       this.closePath();
+      this.restore();
       this.fillStyle = color;
       this.fill();
+    },
+
+    catmullRom: function(points, tension) {
+      var d = [];
+      for (var i = 0, l = points.length; l - 2 * !tension > i; i += 2) {
+        var p = [
+          {x:points[i-2], y:points[i-1]},
+          {x:points[i+0], y:points[i+1]},
+          {x:points[i+2], y:points[i+3]},
+          {x:points[i+4], y:points[i+5]}
+        ];
+        if (tension) {
+          if (!i) {
+            p[0] = {x:points[l-2], y:points[l-1]};
+          } else if (i === l-4) {
+            p[3] = {x:points[0], y:points[1]};
+          } else if (i === l-2) {
+            p[2] = {x:points[0], y:points[1]};
+            p[3] = {x:points[2], y:points[3]};
+          }
+        } else {
+          if (i === l-4) {
+            p[3] = p[2];
+          } else if (!i) {
+            p[0] = {x:points[i], y:points[i+1]};
+          }
+        }
+        d.push([
+          (-p[0].x + 6 * p[1].x + p[2].x) / 6,
+          (-p[0].y + 6 * p[1].y + p[2].y) / 6,
+          ( p[1].x + 6 * p[2].x - p[3].x) / 6,
+          ( p[1].y + 6 * p[2].y - p[3].y) / 6,
+            p[2].x,
+            p[2].y
+        ]);
+      }
+      return d;
     }
 
   });
