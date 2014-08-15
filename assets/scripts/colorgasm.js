@@ -39,7 +39,7 @@
       this.speed = 3;
       this.frequency = 10;
       this.jitter = 0.15;
-      this.friction = 0.01;
+      this.lubricity = 0.01;
       this.elasticity = 0.95;
       this.core = 0.1;
       this.edge = 0.6;
@@ -50,7 +50,7 @@
       this.gui.add(this, 'speed', 0.5, 10);
       this.gui.add(this, 'frequency', 1, 120);
       this.gui.add(this, 'jitter', 0, 1);
-      this.gui.add(this, 'friction', 0, 0.2);
+      this.gui.add(this, 'lubricity', 0, 0.2);
       this.gui.add(this, 'elasticity', 0, 1);
       this.gui.add(this, 'core', 0, 1);
       this.gui.add(this, 'edge', 0, 1);
@@ -94,7 +94,7 @@
       for (var i = this.wave.length - 1; i >= 0; i--) {
         var point = this.wave[i];
         var delta = point.a - point.v;
-        point.p = point.p * this.elasticity + delta * this.friction;
+        point.p = point.p * this.elasticity + delta * this.lubricity;
         point.v += point.p;
       }
       this.time++;
