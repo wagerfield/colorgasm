@@ -35,7 +35,7 @@
     setup: function() {
 
       // Behaviours
-      this.smooth = false;
+      this.smooth = true;
       this.speed = 3;
       this.frequency = 10;
       this.jitter = 0.15;
@@ -95,6 +95,12 @@
         }
         this.counter = 0;
       }
+      this.updateWave();
+      this.updateSpline();
+      this.time++;
+    },
+
+    updateWave: function() {
       _.each(this.wave, function(point) {
         point.p = point.p * this.elasticity + (point.a - point.v) * this.lubricity;
         point.v += point.p;
@@ -103,11 +109,13 @@
         point.x = this.center * point.v;
         point.y = this.height + this.offset - (this.time - point.t) * this.speed;
       }, this);
-      this.time++;
     },
 
     updateSpline: function() {
-      this.spline = this.catmullRom();
+      var points = _.flatten(_.map(this.wave, function(point) {
+        return [point.x, point.y];
+      }));
+      this.spline = this.catmullRom(points, 0);
     },
 
     draw: function() {
@@ -126,21 +134,33 @@
       var x = 0;
       this.save();
       this.beginPath();
+      this.rect(mode ? this.center : 0, 0, this.center, this.height);
+      this.clip();
+      this.beginPath();
       this.translate(this.center, 0);
       this.moveTo(0, _.first(this.wave).y);
-      _.each(this.wave, function(point) {
-        x = mode ? point.x : -point.x;
-        this.lineTo(x * scale, point.y);
-      }, this);
+      if (this.smooth && this.spline.length) {
+        _.each(this.spline, function(point) {
+          this.bezierCurveTo.apply(this, _.map(point, function(value, index) {
+            return index % 2 ? value : (mode ? value : -value) * scale;
+          }, this));
+        }, this);
+      } else {
+        _.each(this.wave, function(point) {
+          x = mode ? point.x : -point.x;
+          this.lineTo(x * scale, point.y);
+        }, this);
+      }
       this.lineTo(0, _.last(this.wave).y);
       this.closePath();
-      this.restore();
       this.fillStyle = color;
       this.fill();
+      this.restore();
     },
 
     catmullRom: function(points, tension) {
-      var d = [];
+      if (points.length < 6) return [];
+      var spline = [];
       for (var i = 0, l = points.length; l - 2 * !tension > i; i += 2) {
         var p = [
           {x:points[i-2], y:points[i-1]},
@@ -164,7 +184,7 @@
             p[0] = {x:points[i], y:points[i+1]};
           }
         }
-        d.push([
+        spline.push([
           (-p[0].x + 6 * p[1].x + p[2].x) / 6,
           (-p[0].y + 6 * p[1].y + p[2].y) / 6,
           ( p[1].x + 6 * p[2].x - p[3].x) / 6,
@@ -173,7 +193,7 @@
             p[2].y
         ]);
       }
-      return d;
+      return spline;
     }
 
   });
