@@ -37,7 +37,7 @@
       // Behaviours
       this.smooth = true;
       this.speed = 3;
-      this.frequency = 10;
+      this.frequency = 20;
       this.jitter = 0.15;
       this.lubricity = 0.01;
       this.elasticity = 0.95;
