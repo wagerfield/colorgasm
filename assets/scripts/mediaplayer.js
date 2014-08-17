@@ -46,12 +46,15 @@
     return this.__registry[type];
   };
 
-  MediaPlayer.prototype.__dispatch = function(type) {
+  MediaPlayer.prototype.__dispatchEvent = function(type) {
     this.__event.schema.type = type;
     for (var key in this.__event.schema) {
       this.__event.schema[key] = this[key];
     }
-    // this.dispatchEvent(this.__event.schema);
+    var listeners = this.__getListeners(type);
+    for (var i = listeners.length - 1; i >= 0; i--) {
+      listeners[i].call(this, this.__event.schema);
+    }
   };
 
   MediaPlayer.prototype.__update = function() {
@@ -71,7 +74,7 @@
       this.progress = this.element.currentTime / this.element.duration;
 
       // Dispatch update event
-      this.__dispatch(MediaPlayerEvent.TIME_UPDATE);
+      this.__dispatchEvent(MediaPlayerEvent.TIME_UPDATE);
     }
 
     // Request animation frame
@@ -98,7 +101,7 @@
         this.muted = this.element.muted;
         break;
     }
-    this.__dispatch(event.type);
+    this.__dispatchEvent(event.type);
   };
 
   //----------------------------------------
