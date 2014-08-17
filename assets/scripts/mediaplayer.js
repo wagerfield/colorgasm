@@ -13,7 +13,7 @@
     this.volume = this.element.volume;
     this.muted = this.element.muted;
     this.preload(preload || 'auto');
-    this.__register = {};
+    this.__registry = {};
     this.__event = new MediaPlayerEvent(this.type);
     this.__update = this.__update.bind(this);
     this.__onEvent = this.__onEvent.bind(this);
@@ -40,10 +40,10 @@
   };
 
   MediaPlayer.prototype.__getListeners = function(type) {
-    if (!this.__register[type]) {
-      this.__register[type] = [];
+    if (!this.__registry[type]) {
+      this.__registry[type] = [];
     }
-    return this.__register[type];
+    return this.__registry[type];
   };
 
   MediaPlayer.prototype.__dispatch = function(type) {
