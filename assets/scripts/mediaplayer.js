@@ -6,13 +6,19 @@
   //
   //----------------------------------------
 
-  var MediaPlayer = function(type, preload) {
+  var MediaPlayer = function(type, options) {
     this.type = /audio|video/.test(type) ? type : 'audio';
     this.element = document.createElement(this.type);
     this.paused = this.element.paused;
     this.volume = this.element.volume;
     this.muted = this.element.muted;
-    this.preload(preload || 'auto');
+    for (var key in this.__defaults) {
+      if (typeof options === 'object' && options[key] !== undefined) {
+        this[key](options[key]);
+      } else {
+        this[key](this.__defaults[key]);
+      }
+    }
     this.__registry = {};
     this.__event = new MediaPlayerEvent(this.type);
     this.__update = this.__update.bind(this);
@@ -26,6 +32,11 @@
   //----------------------------------------
   // MEDIA PLAYER PRIVATE API
   //----------------------------------------
+
+  MediaPlayer.prototype.__defaults = {
+    autoplay: false,
+    preload: 'auto'
+  };
 
   MediaPlayer.prototype.__addEventListeners = function() {
     for (var i = MediaPlayerEvent.EVENTS.length - 1; i >= 0; i--) {
@@ -176,6 +187,10 @@
 
   MediaPlayer.prototype.loop = function(value) {
     this.element.loop = value;
+  };
+
+  MediaPlayer.prototype.autoplay = function(value) {
+    this.element.autoplay = value;
   };
 
   MediaPlayer.prototype.preload = function(value) {
