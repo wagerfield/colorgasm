@@ -12,10 +12,9 @@
     this.paused = this.domElement.paused;
     this.volume = this.domElement.volume;
     this.muted = this.domElement.muted;
-
     this.__update = this.__update.bind(this);
     this.__onEvent = this.__onEvent.bind(this);
-    this.__event = new PlayerEvent();
+    this.__event = new PlayerEvent(this.type);
     this.__addEventListeners();
     this.__update();
   };
@@ -172,7 +171,7 @@
   //
   //----------------------------------------
 
-  var PlayerEvent = function() {
+  var PlayerEvent = function(type) {
     this.type = null;
     this.fileURL = null;
     this.fileType = null;
@@ -186,8 +185,10 @@
     this.progress = null;
     this.volume = null;
     this.muted = null;
-    this.width = null;
-    this.height = null;
+    if (type === 'video') {
+      this.width = null;
+      this.height = null;
+    }
     this.schema = {};
 
     // Build schema
