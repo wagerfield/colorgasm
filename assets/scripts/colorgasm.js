@@ -6,6 +6,7 @@
 
   var player = new MediaPlayer();
   var container = document.getElementById('container');
+  var stage = document.getElementById('stage');
 
   var audio = {};
   audio.context = new AudioContext();
@@ -27,10 +28,10 @@
     SC.initialize({client_id: CLIENT_ID});
 
     // Add event listeners
-    container.addEventListener('touchmove', onContainerInteraction);
-    container.addEventListener('mousedown', onContainerInteraction);
-    container.addEventListener('mouseup', onContainerInteraction);
-    container.addEventListener('click', onContainerInteraction);
+    stage.addEventListener('touchmove', onInteractionEvent);
+    stage.addEventListener('mousedown', onInteractionEvent);
+    stage.addEventListener('mouseup', onInteractionEvent);
+    stage.addEventListener('click', onInteractionEvent);
 
     for (var i = MediaPlayerEvent.EVENTS.length - 1; i >= 0; i--) {
       player.addEventListener(MediaPlayerEvent.EVENTS[i], onMediaPlayerEvent);
@@ -66,7 +67,7 @@
     }
   }
 
-  function onContainerInteraction(event) {
+  function onInteractionEvent(event) {
     switch(event.type) {
       case 'touchmove':
         event.preventDefault();
@@ -134,27 +135,6 @@
   //   '#4D64B0',
   //   '#4C4690'
   // ]);
-
-  // 'https://soundcloud.com/maddecent/no-prayers'
-
-  // var context = new webkitAudioContext(),
-  //     audio = new Audio(),
-  //     source,
-  //     url = 'http://api.soundcloud.com/tracks/39769021/stream' +
-  //           '?client_id=YOUR_CLIENT_ID';
-
-  // audio.src = url;
-  // document.body.appendChild(audio);
-  // audio.style.position = 'fixed';
-  // audio.style.top = '50%';
-  // audio.style.left = 0;
-  // audio.style.zIndex = 1;
-  // audio.play();
-  // source = context.createMediaElementSource(audio);
-  // source.connect(context.destination);
-  // source.mediaElement.play();
-
-  // http://api.soundcloud.com/tracks/39769021/stream?client_id=f818fec91d8b3d04dab7e76dbb18d091
 
   // Sketch.create({
 
