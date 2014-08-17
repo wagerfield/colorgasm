@@ -1,23 +1,40 @@
-(function(window) {
+(function(window, globalID) {
+
+  AudioContext = window.AudioContext || window.webkitAudioContext;
 
   var CLIENT_ID = 'f818fec91d8b3d04dab7e76dbb18d091';
 
-  var audio = new Audio();
-  var playButton = document.getElementById('play');
-  var pauseButton = document.getElementById('pause');
+  var player = new MediaPlayer();
+  var container = document.getElementById('container');
+
+  var audio = {};
+  audio.context = new AudioContext();
+  audio.analyser = audio.context.createAnalyser();
+  audio.analyser.fftSize = 256;
+
+  audio.source = audio.context.createMediaElementSource(player.element);
+  audio.destination = audio.context.destination;
+
+  audio.source.connect(audio.analyser);
+  audio.analyser.connect(audio.destination);
 
   window.addEventListener('load', initialize);
 
   function initialize() {
-    console.dir(audio);
 
     // Initialize components
     FastClick.attach(document.body);
     SC.initialize({client_id: CLIENT_ID});
 
     // Add event listeners
-    playButton.addEventListener('click', _.bind(onPlayButtonClick));
-    pauseButton.addEventListener('click', _.bind(onPauseButtonClick));
+    container.addEventListener('touchmove', onContainerInteraction);
+    container.addEventListener('mousedown', onContainerInteraction);
+    container.addEventListener('mouseup', onContainerInteraction);
+    container.addEventListener('click', onContainerInteraction);
+
+    for (var i = MediaPlayerEvent.EVENTS.length - 1; i >= 0; i--) {
+      player.addEventListener(MediaPlayerEvent.EVENTS[i], onMediaPlayerEvent);
+    }
 
     // Call internal methods
     resolveURL('https://soundcloud.com/maddecent/no-prayers');
@@ -31,9 +48,8 @@
     return url + '?client_id=' + CLIENT_ID;
   }
 
-  function setAudioSource(url) {
-    console.log('setAudioSource:', url);
-    audio.src = url;
+  function loadAudio(url) {
+    player.load(url);
   }
 
   //----------------------------------------
@@ -43,20 +59,39 @@
   function onURLResolved(data) {
     switch(data.kind) {
       case 'track':
-        setAudioSource(buildURL(data.stream_url));
+        loadAudio(buildURL(data.stream_url));
         break;
       case 'playlist':
         break;
     }
   }
 
-  function onPlayButtonClick(event) {
-    audio.play();
+  function onContainerInteraction(event) {
+    switch(event.type) {
+      case 'touchmove':
+        event.preventDefault();
+        break;
+      case 'mousedown':
+        break;
+      case 'mouseup':
+        break;
+      case 'click':
+        player.togglePlayback();
+        break;
+    }
   }
 
-  function onPauseButtonClick(event) {
-    audio.pause();
+  function onMediaPlayerEvent(event) {
+    switch(event.type) {
+      case MediaPlayerEvent.PLAY:
+        console.log('PLAY:', event);
+        break;
+      case MediaPlayerEvent.PAUSE:
+        console.log('PAUSE:', event);
+        break;
+    }
   }
+
 
 
 
@@ -292,4 +327,4 @@
 
   // });
 
-})(window);
+})(window, 'Colorgasm');
