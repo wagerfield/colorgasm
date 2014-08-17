@@ -13,6 +13,7 @@
     this.volume = this.element.volume;
     this.muted = this.element.muted;
     this.preload(preload || 'auto');
+    this.__register = {};
     this.__event = new MediaPlayerEvent(this.type);
     this.__update = this.__update.bind(this);
     this.__onEvent = this.__onEvent.bind(this);
@@ -36,6 +37,13 @@
     for (var i = MediaPlayerEvent.EVENTS.length - 1; i >= 0; i--) {
       this.element.removeEventListener(MediaPlayerEvent.EVENTS[i], this.__onEvent);
     }
+  };
+
+  MediaPlayer.prototype.__getListeners = function(type) {
+    if (!this.__register[type]) {
+      this.__register[type] = [];
+    }
+    return this.__register[type];
   };
 
   MediaPlayer.prototype.__dispatch = function(type) {
@@ -97,10 +105,20 @@
   // MEDIA PLAYER PUBLIC API
   //----------------------------------------
 
-  MediaPlayer.prototype.addEventListener = function(name, callback) {
+  MediaPlayer.prototype.addEventListener = function(type, listener) {
+    var listeners = this.__getListeners(type),
+        index = listeners.indexOf(listener);
+    if (index === -1) {
+      listeners.push(listener);
+    }
   };
 
-  MediaPlayer.prototype.removeEventListener = function(name, callback) {
+  MediaPlayer.prototype.removeEventListener = function(type, listener) {
+    var listeners = this.__getListeners(type),
+        index = listeners.indexOf(listener);
+    if (index !== -1) {
+      listeners.splice(index, 1);
+    }
   };
 
   MediaPlayer.prototype.destroy = function() {
