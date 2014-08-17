@@ -47,10 +47,11 @@
   };
 
   MediaPlayer.prototype.__dispatchEvent = function(type) {
-    this.__event.schema.type = type;
     for (var key in this.__event.schema) {
       this.__event.schema[key] = this[key];
     }
+    this.__event.schema.target = this;
+    this.__event.schema.type = type;
     var listeners = this.__getListeners(type);
     for (var i = listeners.length - 1; i >= 0; i--) {
       listeners[i].call(this, this.__event.schema);
@@ -206,6 +207,7 @@
 
   var MediaPlayerEvent = function(type) {
     this.type = null;
+    this.target = null;
     this.fileURL = null;
     this.fileType = null;
     this.playbackRate = null;
