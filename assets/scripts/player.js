@@ -38,9 +38,12 @@
     }
   };
 
-  Player.prototype.__dispatch = function() {
-    // @event.schema[key] = @model[key] for key of @event.schema
-    // super type, @event.schema
+  Player.prototype.__dispatch = function(type) {
+    this.__event.schema.type = type;
+    for (var key in this.__event.schema) {
+      this.__event.schema[key] = this[key];
+    }
+    this.dispatchEvent(this.__event.schema);
   };
 
   Player.prototype.__update = function() {
