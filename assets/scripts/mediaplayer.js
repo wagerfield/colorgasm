@@ -139,6 +139,7 @@
   MediaPlayer.prototype.destroy = function() {
     cancelAnimationFrame(this.__raf);
     this.__removeEventListeners();
+    this.__registry = null;
     this.__event = null;
     this.element = null;
   };
