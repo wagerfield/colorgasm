@@ -6,7 +6,7 @@
   //
   //----------------------------------------
 
-  var Player = window[globalID] = function(type) {
+  var Player = function(type) {
     this.type = /audio|video/.test(type) ? type : 'audio';
     this.domElement = document.createElement(this.type);
     this.paused = this.domElement.paused;
@@ -19,6 +19,8 @@
     this.__addEventListeners();
     this.__update();
   };
+
+  window[globalID] = Player;
 
   //----------------------------------------
   // PLAYER PRIVATE API
@@ -37,6 +39,8 @@
   };
 
   Player.prototype.__dispatch = function() {
+    // @event.schema[key] = @model[key] for key of @event.schema
+    // super type, @event.schema
   };
 
   Player.prototype.__update = function() {
@@ -165,7 +169,7 @@
   //
   //----------------------------------------
 
-  var PlayerEvent = window[globalID + 'Event'] = function() {
+  var PlayerEvent = function() {
     this.type = null;
     this.fileURL = null;
     this.fileType = null;
@@ -181,7 +185,22 @@
     this.muted = null;
     this.width = null;
     this.height = null;
+    this.schema = {};
+
+    // Build schema
+    var OMIT = ['schema'];
+    for (var key in this) {
+      if (typeof this[key] !== 'function' && OMIT.indexOf(key) === -1) {
+        this.schema[key] = this[key];
+      }
+    }
   };
+
+  window[globalID + 'Event'] = PlayerEvent;
+
+  //----------------------------------------
+  // PLAYER EVENT CONSTANTS
+  //----------------------------------------
 
   PlayerEvent.EVENTS = [
     PlayerEvent.ABORT            = 'abort',
@@ -208,5 +227,21 @@
     PlayerEvent.VOLUME_CHANGE    = 'volumechange',
     PlayerEvent.WAITING          = 'waiting'
   ];
+
+  //----------------------------------------
+  // PLAYER EVENT PUBLIC API
+  //----------------------------------------
+
+  Player.prototype.set = function(object) {
+    for (var key in this.schema) {
+      if (object[key]) {
+        this[key] = this.schema[key] = object[key];
+      }
+    }
+  };
+
+  Player.prototype.get = function() {
+    return this.schema;
+  };
 
 })(window, 'Player');
