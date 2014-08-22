@@ -85,13 +85,53 @@
   function onMediaPlayerEvent(event) {
     switch(event.type) {
       case MediaPlayerEvent.PLAY:
-        console.log('PLAY:', event);
         break;
       case MediaPlayerEvent.PAUSE:
-        console.log('PAUSE:', event);
         break;
     }
   }
+
+  //----------------------------------------
+  // SKETCH
+  //----------------------------------------
+
+  Sketch.create({
+
+    container: stage,
+    // retina: window.devicePixelRatio > 1,
+
+    setup: function() {
+    },
+
+    update: function() {
+      // this.dx = this.mouse.x = this.mx;
+      // console.log(this.dx);
+    },
+
+    draw: function() {
+      if (this.dragging) {
+        this.beginPath();
+        this.moveTo(this.mx, this.my);
+        this.lineTo(this.mouse.x, this.my);
+        this.lineTo(this.mouse.x, this.mouse.y);
+        this.strokeStyle = '#D22';
+        this.lineWidth = 2;
+        this.stroke();
+      }
+    },
+
+    mousedown: function() {
+      this.dragging = true;
+      this.mx = this.mouse.x;
+      this.my = this.mouse.y;
+    },
+
+    mouseup: function() {
+      this.dragging = false;
+    }
+
+  });
+
 
 
 
