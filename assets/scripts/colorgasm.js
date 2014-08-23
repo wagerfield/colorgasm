@@ -3,6 +3,11 @@
   AudioContext = window.AudioContext || window.webkitAudioContext;
 
   var CLIENT_ID = 'f818fec91d8b3d04dab7e76dbb18d091';
+  var TRACKS = [
+    'https://soundcloud.com/bearded-man-recordings/lost-frequencies-are-you-with-me-1',
+    'https://soundcloud.com/callanalexander/cln-better-than-feki-remix',
+    'https://soundcloud.com/maddecent/no-prayers'
+  ];
 
   var player = new MediaPlayer();
   var container = document.getElementById('container');
@@ -13,15 +18,17 @@
   audio.analyser = audio.context.createAnalyser();
   audio.analyser.fftSize = 256;
 
-  audio.source = audio.context.createMediaElementSource(player.element);
+  // audio.source = audio.context.createMediaElementSource(player.element);
   audio.destination = audio.context.destination;
 
-  audio.source.connect(audio.analyser);
-  audio.analyser.connect(audio.destination);
+  // audio.source.connect(audio.analyser);
+  // audio.analyser.connect(audio.destination);
 
   window.addEventListener('load', initialize);
 
   function initialize() {
+
+    window[globalID] = audio;
 
     // Initialize components
     FastClick.attach(document.body);
@@ -38,7 +45,8 @@
     }
 
     // Call internal methods
-    resolveURL('https://soundcloud.com/maddecent/no-prayers');
+    // resolveURL(TRACKS[2]);
+    loadAudio('assets/sounds/no-prayers.mp3');
   }
 
   function resolveURL(url) {
@@ -50,7 +58,61 @@
   }
 
   function loadAudio(url) {
+    var request = new XMLHttpRequest();
+    request.open('GET', url, true);
+    request.responseType = 'arraybuffer';
+    request.onload = function() {
+      audio.context.decodeAudioData(request.response, function(buffer) {
+        audio.buffers = {
+          forward: buffer,
+          reverse: reverseAudioBuffer(buffer)
+        };
+        console.log('decoded:', buffer);
+        play(0, true);
+      }, function() {
+        console.log('ERROR!');
+      });
+    };
+    request.send();
+  }
+
+  function streamAudio(url) {
     player.load(url);
+  }
+
+  function reverseAudioBuffer(buffer) {
+    var clone = cloneAudioBuffer(buffer);
+    for (var i = 0, c = clone.numberOfChannels; i < c; i++) {
+      Array.prototype.reverse.call(clone.getChannelData(i));
+    }
+    return clone;
+  }
+
+  function cloneAudioBuffer(buffer) {
+    var clone = audio.context.createBuffer(buffer.numberOfChannels, buffer.length, buffer.sampleRate);
+    for (var i = 0, c = buffer.numberOfChannels; i < c; i++) {
+      var bufferData = buffer.getChannelData(i),
+          cloneData = clone.getChannelData(i);
+      cloneData.set(bufferData, 0);
+    }
+    return clone;
+  }
+
+  function play(time, reverse) {
+    console.log('play', time, audio);
+
+    stop();
+    audio.source = audio.context.createBufferSource();
+    audio.source.buffer = reverse ? audio.buffers.reverse : audio.buffers.forward;
+    audio.source.connect(audio.destination);
+    audio.source.start(time);
+  }
+
+  function stop() {
+    if (audio.source) {
+      audio.source.stop();
+      console.log('stop', audio);
+    }
   }
 
   //----------------------------------------
@@ -60,7 +122,11 @@
   function onURLResolved(data) {
     switch(data.kind) {
       case 'track':
-        loadAudio(buildURL(data.stream_url));
+        if (data.downloadable) {
+          loadAudio(buildURL(data.download_url));
+        } else if (data.streamable) {
+          streamAudio(buildURL(data.stream_url));
+        }
         break;
       case 'playlist':
         break;
@@ -77,7 +143,7 @@
       case 'mouseup':
         break;
       case 'click':
-        player.togglePlayback();
+        // player.togglePlayback();
         break;
     }
   }
@@ -101,11 +167,13 @@
     // retina: window.devicePixelRatio > 1,
 
     setup: function() {
+      this.mouse.down = {x:0, y:0};
+      this.mouse.delta = {x:0, y:0};
     },
 
     update: function() {
-      // this.dx = this.mouse.x = this.mx;
-      // console.log(this.dx);
+      this.mouse.delta.x = this.mouse.x - this.mouse.down.x;
+      this.mouse.delta.y = this.mouse.y - this.mouse.down.y;
     },
 
     draw: function() {
@@ -122,8 +190,8 @@
 
     mousedown: function() {
       this.dragging = true;
-      this.mx = this.mouse.x;
-      this.my = this.mouse.y;
+      this.mouse.down.x = this.mouse.x;
+      this.mouse.down.y = this.mouse.y;
     },
 
     mouseup: function() {
