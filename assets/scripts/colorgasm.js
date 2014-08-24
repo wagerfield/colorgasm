@@ -13,7 +13,8 @@
   var player = new MediaPlayer();
   var container = document.getElementById('container');
   var stage = document.getElementById('stage');
-  var gui = new dat.GUI();
+  stage.style.backgroundColor = '#1E1A31';
+  // var gui = new dat.GUI();
 
   var audio = {offsetTime:0, startTime:0, scratch:0.2};
   audio.context = new AudioContext();
@@ -26,17 +27,13 @@
   // audio.source.connect(audio.analyser);
   // audio.analyser.connect(audio.destination);
 
-  window.addEventListener('load', initialize);
-
-  function initialize() {
+  (function initialize() {
 
     window[globalID] = audio;
 
     // Initialize components
     FastClick.attach(document.body);
     SC.initialize({client_id: CLIENT_ID});
-
-    stage.style.backgroundColor = '#1E1A31';
 
     // Add event listeners
     stage.addEventListener('touchmove', onInteractionEvent);
@@ -48,12 +45,12 @@
       player.addEventListener(MediaPlayerEvent.EVENTS[i], onMediaPlayerEvent);
     }
 
-    gui.add(audio, 'scratch', 0, 2);
+    // gui.add(audio, 'scratch', 0, 2);
 
     // Call internal methods
     // resolveURL(TRACKS[2]);
     // loadAudio('assets/sounds/crystalizabeths.mp3');
-  }
+  })();
 
   function resolveURL(url) {
     SC.get('/resolve', {url:url}, onURLResolved);
@@ -192,7 +189,10 @@
       this.ts = 1 / 1000 / 60;
       this.deck = {
         rotation: 0,
-        rpm: 33
+        radius: 0,
+        rpm: 33,
+        x: 0,
+        y: 0
       };
       this.mouse.down = {
         minX:0,
@@ -243,17 +243,57 @@
     resize: function() {
       this.cx = Math.round(this.width/2);
       this.cy = Math.round(this.height/2);
+      this.deck.x = this.cx;
+      this.deck.y = this.cy;
+      this.deck.radius = Math.round(Math.min(200, this.cx, this.cy) * 0.7);
+      this.deck.pin = this.deck.radius * 0.05;
+    },
+
+    polar: function(angle, length, x, y) {
+      return [x + length * Math.cos(angle), y + length * Math.sin(angle)];
     },
 
     draw: function() {
-      // this.save();
-      // this.translate(this.width/2, this.height/2);
-      // this.rotate(this.deck.rotation);
-      this.beginPath();
-      this.arc(this.cx, this.cy, 100, this.deck.rotation, this.deck.rotation + TWO_PI, false);
-      this.lineTo(this.cx, this.cy);
+      // '#FFE193',
+      // '#FFB46B',
+      // '#F98A75',
+      // '#E2687C',
+      // '#B14B77',
+      // '#6B2A64'
+      //
+      // '#B9F7F5',
+      // '#72D4E2',
+      // '#5BAFCD',
+      // '#518CBE',
+      // '#4D64B0',
+      // '#4C4690'
+
+      // DECK
       this.strokeStyle = '#B14B77';
+      this.beginPath();
+      this.arc(this.deck.x, this.deck.y, this.deck.radius, 0, TWO_PI, true);
       this.stroke();
+      this.beginPath();
+      this.arc(this.deck.x, this.deck.y, this.deck.pin, 0, TWO_PI, false);
+      this.stroke();
+      var p1 = this.polar(this.deck.rotation, this.deck.pin, this.deck.x, this.deck.y);
+      var p2 = this.polar(this.deck.rotation, this.deck.radius * 1, this.deck.x, this.deck.y);
+      this.beginPath();
+      this.moveTo(p1[0], p1[1]);
+      this.lineTo(p2[0], p2[1]);
+      this.stroke();
+
+      // MOUSE
+      if (this.dragging) {
+        // var x = this.mouse.x - this.deck.x;
+        // var y = this.mouse.y - this.deck.y;
+        this.strokeStyle = '#F98A75';
+        this.beginPath();
+        this.moveTo(this.deck.x, this.deck.y);
+        this.lineTo(this.mouse.x, this.mouse.y);
+        this.stroke();
+      }
+
       // if (DECODED) {
       //   this.beginPath();
       //   this.fillStyle = '#1E1A31';
