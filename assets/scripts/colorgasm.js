@@ -226,7 +226,15 @@
     },
 
     update: function() {
-      this.deck.rotation += this.dt * this.ts * this.deck.rpm * TWO_PI;
+
+      if (this.dragging) {
+        this.deck.mx = this.mouse.x - this.deck.x;
+        this.deck.my = this.mouse.y - this.deck.y;
+        var delta = Math.atan2(this.deck.my, this.deck.mx) - this.mouse.down.angle;
+        this.deck.rotation = this.mouse.down.rotation + delta;
+      } else {
+        this.deck.rotation += this.dt * this.ts * this.deck.rpm * TWO_PI;
+      }
 
       // this.mouse.down.dx = this.mouse.x - this.mouse.down.x;
       // this.mouse.down.dy = this.mouse.y - this.mouse.down.y;
@@ -234,7 +242,7 @@
       // this.mouse.move.dy = this.mouse.y - this.mouse.move.oy;
       // this.mouse.move.ox = this.mouse.x;
       // this.mouse.move.oy = this.mouse.y;
-      if (audio.playing && this.dragging) {
+      // if (audio.playing && this.dragging) {
         // var ratioX = this.mouse.down.dx / this.mouse.down.minX;
         // var ratioY = this.mouse.down.dy / this.mouse.down.minY;
         // ratioX = Math.max(ratioX,-1);
@@ -248,7 +256,7 @@
         //   console.log(offset);
         //   play(audio.offsetTime + delta + offset, false);
         // }
-      }
+      // }
     },
 
     draw: function() {
@@ -309,8 +317,14 @@
 
     mousedown: function() {
       this.dragging = true;
+
+      this.deck.mx = this.mouse.x - this.deck.x;
+      this.deck.my = this.mouse.y - this.deck.y;
+
       this.mouse.down.x = this.mouse.x;
       this.mouse.down.y = this.mouse.y;
+      this.mouse.down.rotation = this.deck.rotation;
+      this.mouse.down.angle = Math.atan2(this.deck.my, this.deck.mx);
       this.mouse.down.minX = Math.min(this.mouse.x, this.width - this.mouse.x);
       this.mouse.down.minY = Math.min(this.mouse.y, this.height - this.mouse.y);
       this.mouse.down.maxX = this.width - this.mouse.down.minX;
