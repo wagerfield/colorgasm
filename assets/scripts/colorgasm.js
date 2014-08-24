@@ -246,7 +246,7 @@
       this.deck.x = this.cx;
       this.deck.y = this.cy;
       this.deck.radius = Math.round(Math.min(200, this.cx, this.cy) * 0.7);
-      this.deck.pin = this.deck.radius * 0.05;
+      this.deck.pin = Math.round(this.deck.radius * 0.05);
     },
 
     polar: function(angle, length, x, y) {
@@ -270,23 +270,22 @@
 
       // DECK
       this.strokeStyle = '#B14B77';
+      // Rim
       this.beginPath();
       this.arc(this.deck.x, this.deck.y, this.deck.radius, 0, TWO_PI, true);
       this.stroke();
+      // Pin
       this.beginPath();
       this.arc(this.deck.x, this.deck.y, this.deck.pin, 0, TWO_PI, false);
       this.stroke();
-      var p1 = this.polar(this.deck.rotation, this.deck.pin, this.deck.x, this.deck.y);
-      var p2 = this.polar(this.deck.rotation, this.deck.radius * 1, this.deck.x, this.deck.y);
+      // Cord
       this.beginPath();
-      this.moveTo(p1[0], p1[1]);
-      this.lineTo(p2[0], p2[1]);
+      this.moveTo.apply(this, this.polar(this.deck.rotation, this.deck.pin, this.deck.x, this.deck.y));
+      this.lineTo.apply(this, this.polar(this.deck.rotation, this.deck.radius * 1, this.deck.x, this.deck.y));
       this.stroke();
 
       // MOUSE
       if (this.dragging) {
-        // var x = this.mouse.x - this.deck.x;
-        // var y = this.mouse.y - this.deck.y;
         this.strokeStyle = '#F98A75';
         this.beginPath();
         this.moveTo(this.deck.x, this.deck.y);
