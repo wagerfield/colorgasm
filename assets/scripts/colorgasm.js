@@ -2,6 +2,7 @@
 
   AudioContext = window.AudioContext || window.webkitAudioContext;
 
+  var DECODED = false;
   var CLIENT_ID = 'f818fec91d8b3d04dab7e76dbb18d091';
   var TRACKS = [
     'https://soundcloud.com/bearded-man-recordings/lost-frequencies-are-you-with-me-1',
@@ -12,8 +13,9 @@
   var player = new MediaPlayer();
   var container = document.getElementById('container');
   var stage = document.getElementById('stage');
+  var gui = new dat.GUI();
 
-  var audio = {};
+  var audio = {offsetTime:0, startTime:0, scratch:0.2};
   audio.context = new AudioContext();
   audio.analyser = audio.context.createAnalyser();
   audio.analyser.fftSize = 256;
@@ -44,9 +46,11 @@
       player.addEventListener(MediaPlayerEvent.EVENTS[i], onMediaPlayerEvent);
     }
 
+    gui.add(audio, 'scratch', 0, 2);
+
     // Call internal methods
     // resolveURL(TRACKS[2]);
-    loadAudio('assets/sounds/no-prayers.mp3');
+    loadAudio('assets/sounds/crystalizabeths.mp3');
   }
 
   function resolveURL(url) {
@@ -61,14 +65,13 @@
     var request = new XMLHttpRequest();
     request.open('GET', url, true);
     request.responseType = 'arraybuffer';
-    request.onload = function() {
+    request.onload = function(a, b, c) {
       audio.context.decodeAudioData(request.response, function(buffer) {
         audio.buffers = {
           forward: buffer,
           reverse: reverseAudioBuffer(buffer)
         };
-        console.log('decoded:', buffer);
-        play(0, true);
+        DECODED = true;
       }, function() {
         console.log('ERROR!');
       });
@@ -77,7 +80,7 @@
   }
 
   function streamAudio(url) {
-    player.load(url);
+    // player.load(url);
   }
 
   function reverseAudioBuffer(buffer) {
@@ -98,21 +101,29 @@
     return clone;
   }
 
-  function play(time, reverse) {
-    console.log('play', time, audio);
-
+  function play(offset, reverse) {
     stop();
+    audio.buffer = reverse ? audio.buffers.reverse : audio.buffers.forward;
     audio.source = audio.context.createBufferSource();
-    audio.source.buffer = reverse ? audio.buffers.reverse : audio.buffers.forward;
+    audio.source.buffer = audio.buffer;
     audio.source.connect(audio.destination);
-    audio.source.start(time);
+    audio.offsetTime = Math.max(0, Math.min(audio.buffer.duration, offset));
+    audio.startTime = audio.context.currentTime;
+    audio.source.start(0, audio.offsetTime);
+    audio.playing = true;
   }
 
   function stop() {
     if (audio.source) {
-      audio.source.stop();
-      console.log('stop', audio);
+      audio.source.stop(0);
+      audio.source.disconnect();
+      audio.offsetTime += audio.context.currentTime - audio.startTime;
+      audio.playing = false;
     }
+  }
+
+  function getCurrentTime(offset, startTime, currentTime) {
+    return audio.offsetTime + (audio.context.currentTime - audio.startTime);
   }
 
   //----------------------------------------
@@ -143,7 +154,16 @@
       case 'mouseup':
         break;
       case 'click':
-        // player.togglePlayback();
+        if (DECODED) {
+          if (!audio.playing) {
+            play(0, false);
+          }
+          // if (audio.playing) {
+          //   stop();
+          // } else {
+          //   play(audio.offsetTime, false);
+          // }
+        }
         break;
     }
   }
@@ -167,22 +187,60 @@
     // retina: window.devicePixelRatio > 1,
 
     setup: function() {
-      this.mouse.down = {x:0, y:0};
-      this.mouse.delta = {x:0, y:0};
+      this.mouse.down = {
+        minX:0,
+        maxX:0,
+        minY:0,
+        maxY:0,
+        dx:0,
+        dy:0,
+        x:0,
+        y:0
+      };
+      this.mouse.move = {
+        ox:0,
+        oy:0,
+        dx:0,
+        dy:0
+      };
     },
 
     update: function() {
-      this.mouse.delta.x = this.mouse.x - this.mouse.down.x;
-      this.mouse.delta.y = this.mouse.y - this.mouse.down.y;
+      this.mouse.down.dx = this.mouse.x - this.mouse.down.x;
+      this.mouse.down.dy = this.mouse.y - this.mouse.down.y;
+      this.mouse.move.dx = this.mouse.x - this.mouse.move.ox;
+      this.mouse.move.dy = this.mouse.y - this.mouse.move.oy;
+      this.mouse.move.ox = this.mouse.x;
+      this.mouse.move.oy = this.mouse.y;
+      if (audio.playing && this.dragging) {
+        // var ratioX = this.mouse.down.dx / this.mouse.down.minX;
+        // var ratioY = this.mouse.down.dy / this.mouse.down.minY;
+        // ratioX = Math.max(ratioX,-1);
+        // ratioX = Math.min(ratioX, 1);
+        // ratioY = Math.max(ratioY,-1);
+        // ratioY = Math.min(ratioY, 1);
+        // audio.source.playbackRate.value = 1 + ratio;
+        var delta = audio.context.currentTime - audio.startTime;
+        var offset = audio.scratch * -this.mouse.move.dy;
+        if (offset !== 0) {
+          console.log(offset);
+          play(audio.offsetTime + delta + offset, false);
+        }
+      }
     },
 
     draw: function() {
+      if (DECODED) {
+        this.beginPath();
+        this.fillStyle = '#1E1A31';
+        this.fillRect(0, 0, this.width, this.height);
+      }
       if (this.dragging) {
         this.beginPath();
-        this.moveTo(this.mx, this.my);
-        this.lineTo(this.mouse.x, this.my);
+        this.moveTo(this.mouse.down.x, this.mouse.down.y);
+        this.lineTo(this.mouse.x, this.mouse.down.y);
         this.lineTo(this.mouse.x, this.mouse.y);
-        this.strokeStyle = '#D22';
+        this.strokeStyle = '#F98A75';
         this.lineWidth = 2;
         this.stroke();
       }
@@ -192,6 +250,10 @@
       this.dragging = true;
       this.mouse.down.x = this.mouse.x;
       this.mouse.down.y = this.mouse.y;
+      this.mouse.down.minX = Math.min(this.mouse.x, this.width - this.mouse.x);
+      this.mouse.down.minY = Math.min(this.mouse.y, this.height - this.mouse.y);
+      this.mouse.down.maxX = this.width - this.mouse.down.minX;
+      this.mouse.down.maxY = this.height - this.mouse.down.minY;
     },
 
     mouseup: function() {
