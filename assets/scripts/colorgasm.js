@@ -32,18 +32,20 @@
   // Cord
   //----------------------------------------
 
-  var Cord = function(thickness, width, aOffset, bOffset) {
-    this.thickness = thickness || 1;
-    this.width = width || 10;
+  var Cord = function(width, aOffset, bOffset) {
     this.aOffset = aOffset || 0;
     this.bOffset = bOffset || 0;
+    this.width = width || 10;
     this.a = Vector.create();
     this.b = Vector.create();
-    this.z = Vector.create();
+    this.f = Vector.create();
   };
   Cord.prototype = {
     draw: function(context) {
-      // context.beginPath();
+      context.beginPath();
+      context.moveTo(this.a.x, this.a.y);
+      context.lineTo(this.b.x, this.b.y);
+      context.stroke();
       // Vector.sub(this.z, this.b, this.a);
       // Vector.rotate(this.z, HALF_PI);
     }
@@ -95,7 +97,8 @@
   };
   Colorgasm.prototype = {
     setColorPalette: function(id, base, core, west, east) {
-      return this.palettes[id] = {base:base, core:core, west:west, east:east};
+      this.palettes[id] = {base:base, core:core, west:west, east:east};
+      return this.palettes[id];
     },
     getColorPalette: function(id) {
       return this.palettes[id];
@@ -151,14 +154,12 @@
       this.deck.x = this.centerX;
       this.deck.y = this.centerY;
       this.deck.rimRadius = Math.round(Math.min(this.centerX, this.centerY) * 0.7);
-      this.deck.pinRadius = Math.round(this.deck.radius * 0.05);
+      this.deck.pinRadius = Math.round(this.deck.rimRadius * 0.05);
     },
 
     update: function() {
-      this.mouse.cord.a.x = this.deck.x;
-      this.mouse.cord.a.y = this.deck.y;
-      this.mouse.cord.b.x = this.mouse.x;
-      this.mouse.cord.b.y = this.mouse.y;
+      Vector.copy(this.mouse.cord.a, this.deck);
+      Vector.copy(this.mouse.cord.b, this.mouse);
     },
 
     draw: function() {
