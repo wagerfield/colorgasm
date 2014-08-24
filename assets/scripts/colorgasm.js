@@ -4,18 +4,49 @@
   // Vector
   //----------------------------------------
 
-  var Vector = function(x, y) {
-    this.x = x || 0;
-    this.y = y || 0;
-  };
-  Vector.prototype = {
-    id: function() {
-      this.x = 0;
-      this.y = 0;
+  var Vector = {
+    create: function(x, y) {
+      return {x:x||0, y:y||0};
+    },
+    id: function(target) {
+      target.x = 0;
+      target.y = 0;
+    },
+    copy: function(target, a) {
+      target.x = a.x;
+      target.y = a.y;
+    },
+    sub: function(target, a, b) {
+      target.x = a.x - b.x;
+      target.y = a.y - b.y;
+    },
+    add: function(target, a, b) {
+      target.x = a.x + b.x;
+      target.y = a.y + b.y;
     }
   };
-  Vector.polar = function(angle, length, x, y) {
-    return [x + length * Math.cos(angle), y + length * Math.sin(angle)];
+
+
+
+  //----------------------------------------
+  // Cord
+  //----------------------------------------
+
+  var Cord = function(thickness, width, aOffset, bOffset) {
+    this.thickness = thickness || 1;
+    this.width = width || 10;
+    this.aOffset = aOffset || 0;
+    this.bOffset = bOffset || 0;
+    this.a = Vector.create();
+    this.b = Vector.create();
+    this.z = Vector.create();
+  };
+  Cord.prototype = {
+    draw: function(context) {
+      // context.beginPath();
+      // Vector.sub(this.z, this.b, this.a);
+      // Vector.rotate(this.z, HALF_PI);
+    }
   };
 
 
@@ -25,7 +56,7 @@
   //----------------------------------------
 
   var Deck = function(rpm) {
-    this.ts = 1 / 1000 / 60;
+    this.mtm = 1 / 1000 / 60;
     this.rpm = rpm || 33;
     this.rimRadius = 0;
     this.pinRadius = 0;
@@ -64,7 +95,7 @@
   };
   Colorgasm.prototype = {
     setColorPalette: function(id, base, core, west, east) {
-      this.palettes[id] = {base:base, core:core, west:west, east:east};
+      return this.palettes[id] = {base:base, core:core, west:west, east:east};
     },
     getColorPalette: function(id) {
       return this.palettes[id];
@@ -83,8 +114,9 @@
 
     setup: function() {
       this.deck = new Deck();
+      this.mouse.cord = new Cord();
       this.colorgasm = new Colorgasm();
-      this.colorgasm.setColorPalette('main',
+      this.setColorPalette(this.colorgasm.setColorPalette('main',
         '#1E1A31', // Base
         '#FFFFFF', // Core
       [
@@ -101,8 +133,7 @@
         '#518CBE',
         '#4D64B0',
         '#4C4690'
-      ]);
-      this.setColorPalette(this.colorgasm.getColorPalette('main'));
+      ]));
     },
 
     setColorPalette: function(palette) {
@@ -124,14 +155,10 @@
     },
 
     update: function() {
-      // if (this.dragging) {
-      //   this.deck.mx = this.mouse.x - this.deck.x;
-      //   this.deck.my = this.mouse.y - this.deck.y;
-      //   var delta = Math.atan2(this.deck.my, this.deck.mx) - this.mouse.down.angle;
-      //   this.deck.rotation = this.mouse.down.rotation + delta;
-      // } else {
-      //   this.deck.rotation += this.dt * this.ts * this.deck.rpm * TWO_PI;
-      // }
+      this.mouse.cord.a.x = this.deck.x;
+      this.mouse.cord.a.y = this.deck.y;
+      this.mouse.cord.b.x = this.mouse.x;
+      this.mouse.cord.b.y = this.mouse.y;
     },
 
     draw: function() {
@@ -143,31 +170,20 @@
       // MOUSE
       if (this.dragging) {
         this.strokeStyle = this.palette.west[2];
-        this.beginPath();
-        this.moveTo(this.deck.x, this.deck.y);
-        this.lineTo(this.mouse.x, this.mouse.y);
-        this.stroke();
+        this.mouse.cord.draw(this);
       }
     },
 
     mousedown: function() {
       this.dragging = true;
-
-      // this.deck.mx = this.mouse.x - this.deck.x;
-      // this.deck.my = this.mouse.y - this.deck.y;
-
-      // this.mouse.down.x = this.mouse.x;
-      // this.mouse.down.y = this.mouse.y;
-      // this.mouse.down.rotation = this.deck.rotation;
-      // this.mouse.down.angle = Math.atan2(this.deck.my, this.deck.mx);
-      // this.mouse.down.minX = Math.min(this.mouse.x, this.width - this.mouse.x);
-      // this.mouse.down.minY = Math.min(this.mouse.y, this.height - this.mouse.y);
-      // this.mouse.down.maxX = this.width - this.mouse.down.minX;
-      // this.mouse.down.maxY = this.height - this.mouse.down.minY;
     },
 
     mouseup: function() {
       this.dragging = false;
+    },
+
+    hit: function(x, y, hx, hy, hw, hh) {
+      return x >= hx && x <= hx + hw && y >= hy && y <= hy + hh;
     }
 
   });
