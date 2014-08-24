@@ -8,7 +8,7 @@
     create: function(x, y) {
       return {x:x||0, y:y||0};
     },
-    id: function(target) {
+    identity: function(target) {
       target.x = 0;
       target.y = 0;
     },
@@ -16,13 +16,49 @@
       target.x = a.x;
       target.y = a.y;
     },
-    sub: function(target, a, b) {
+    subtract: function(target, a, b) {
       target.x = a.x - b.x;
       target.y = a.y - b.y;
     },
     add: function(target, a, b) {
       target.x = a.x + b.x;
       target.y = a.y + b.y;
+    },
+    scale: function(target, a, s) {
+      target.x = a.x * s;
+      target.y = a.y * s;
+    },
+    squaredLength: function(vector) {
+      var x = vector.x;
+      var y = vector.y;
+      return x*x + y*y;
+    },
+    length: function(vector) {
+      return Math.sqrt(this.squaredLength(vector));
+    },
+    normalise: function(target, a, opt_length) {
+      opt_length = opt_length || 1;
+      var l = this.squaredLength(a);
+      if (l > 0) {
+        l = opt_length / Math.sqrt(l);
+        this.scale(target, a, l);
+      } else {
+        this.identity(target);
+      }
+      return target;
+    },
+    rotate: function(target, a, angle) {
+      if (angle === 0) {
+        return this.copy(target, a);
+      } else {
+        var s = Math.sin(angle);
+        var c = Math.cos(angle);
+        var x = (a.x * c) - (a.y * s);
+        var y = (a.x * s) + (a.y * c);
+        target.x = x;
+        target.y = y;
+        return target;
+      }
     }
   };
 
@@ -32,22 +68,34 @@
   // Cord
   //----------------------------------------
 
-  var Cord = function(width, aOffset, bOffset) {
+  var Cord = function(radius, aOffset, bOffset) {
     this.aOffset = aOffset || 0;
     this.bOffset = bOffset || 0;
-    this.width = width || 10;
+    this.radius = radius || 10;
+    this._a = Vector.create();
+    this._b = Vector.create();
     this.a = Vector.create();
     this.b = Vector.create();
-    this.f = Vector.create();
   };
   Cord.prototype = {
+    drawFoot: function(context, anchor) {
+      context.beginPath();
+      Vector.subtract(this._a, this.b, this.a);
+      Vector.rotate(this._a, this._a, HALF_PI);
+      Vector.normalise(this._a, this._a, this.radius);
+      Vector.subtract(this._b, anchor, this._a);
+      context.moveTo(this._b.x, this._b.y);
+      Vector.add(this._b, this._a, anchor);
+      context.lineTo(this._b.x, this._b.y);
+      context.stroke();
+    },
     draw: function(context) {
       context.beginPath();
       context.moveTo(this.a.x, this.a.y);
       context.lineTo(this.b.x, this.b.y);
       context.stroke();
-      // Vector.sub(this.z, this.b, this.a);
-      // Vector.rotate(this.z, HALF_PI);
+      this.drawFoot(context, this.a);
+      this.drawFoot(context, this.b);
     }
   };
 
@@ -111,13 +159,13 @@
   // Sketch
   //----------------------------------------
 
-  Sketch.create({
+  window[globalID] = Sketch.create({
 
     container: document.getElementById('stage'),
 
     setup: function() {
       this.deck = new Deck();
-      this.mouse.cord = new Cord();
+      this.mouse.cord = new Cord(20);
       this.colorgasm = new Colorgasm();
       this.setColorPalette(this.colorgasm.setColorPalette('main',
         '#1E1A31', // Base
@@ -155,6 +203,7 @@
       this.deck.y = this.centerY;
       this.deck.rimRadius = Math.round(Math.min(this.centerX, this.centerY) * 0.7);
       this.deck.pinRadius = Math.round(this.deck.rimRadius * 0.05);
+      this.draw();
     },
 
     update: function() {
