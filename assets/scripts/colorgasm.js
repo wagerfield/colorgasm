@@ -68,9 +68,7 @@
   // Cord
   //----------------------------------------
 
-  var Cord = function(radius, aOffset, bOffset) {
-    this.aOffset = aOffset || 0;
-    this.bOffset = bOffset || 0;
+  var Cord = function(radius) {
     this.radius = radius || 10;
     this._a = Vector.create();
     this._b = Vector.create();
@@ -203,6 +201,9 @@
       this.deck.y = this.centerY;
       this.deck.rimRadius = Math.round(Math.min(this.centerX, this.centerY) * 0.7);
       this.deck.pinRadius = Math.round(this.deck.rimRadius * 0.05);
+
+      // Resize mouse cord
+      this.mouse.cord.radius = this.deck.pinRadius;
       this.draw();
     },
 
