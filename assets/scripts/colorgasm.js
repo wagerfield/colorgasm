@@ -185,6 +185,10 @@
     container: stage,
     // retina: window.devicePixelRatio > 1,
 
+    polar: function(angle, length, x, y) {
+      return [x + length * Math.cos(angle), y + length * Math.sin(angle)];
+    },
+
     setup: function() {
       this.ts = 1 / 1000 / 60;
       this.deck = {
@@ -212,17 +216,24 @@
       };
     },
 
+    resize: function() {
+      this.cx = Math.round(this.width/2);
+      this.cy = Math.round(this.height/2);
+      this.deck.x = this.cx;
+      this.deck.y = this.cy;
+      this.deck.radius = Math.round(Math.min(200, this.cx, this.cy) * 0.7);
+      this.deck.pin = Math.round(this.deck.radius * 0.05);
+    },
+
     update: function() {
       this.deck.rotation += this.dt * this.ts * this.deck.rpm * TWO_PI;
 
-
-
-      this.mouse.down.dx = this.mouse.x - this.mouse.down.x;
-      this.mouse.down.dy = this.mouse.y - this.mouse.down.y;
-      this.mouse.move.dx = this.mouse.x - this.mouse.move.ox;
-      this.mouse.move.dy = this.mouse.y - this.mouse.move.oy;
-      this.mouse.move.ox = this.mouse.x;
-      this.mouse.move.oy = this.mouse.y;
+      // this.mouse.down.dx = this.mouse.x - this.mouse.down.x;
+      // this.mouse.down.dy = this.mouse.y - this.mouse.down.y;
+      // this.mouse.move.dx = this.mouse.x - this.mouse.move.ox;
+      // this.mouse.move.dy = this.mouse.y - this.mouse.move.oy;
+      // this.mouse.move.ox = this.mouse.x;
+      // this.mouse.move.oy = this.mouse.y;
       if (audio.playing && this.dragging) {
         // var ratioX = this.mouse.down.dx / this.mouse.down.minX;
         // var ratioY = this.mouse.down.dy / this.mouse.down.minY;
@@ -238,19 +249,6 @@
         //   play(audio.offsetTime + delta + offset, false);
         // }
       }
-    },
-
-    resize: function() {
-      this.cx = Math.round(this.width/2);
-      this.cy = Math.round(this.height/2);
-      this.deck.x = this.cx;
-      this.deck.y = this.cy;
-      this.deck.radius = Math.round(Math.min(200, this.cx, this.cy) * 0.7);
-      this.deck.pin = Math.round(this.deck.radius * 0.05);
-    },
-
-    polar: function(angle, length, x, y) {
-      return [x + length * Math.cos(angle), y + length * Math.sin(angle)];
     },
 
     draw: function() {
