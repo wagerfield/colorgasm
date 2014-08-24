@@ -16,6 +16,10 @@
       target.x = a.x;
       target.y = a.y;
     },
+    set: function(target, x, y) {
+      target.x = x;
+      target.y = y;
+    },
     subtract: function(target, a, b) {
       target.x = a.x - b.x;
       target.y = a.y - b.y;
@@ -69,7 +73,7 @@
   //----------------------------------------
 
   var Cord = function(radius) {
-    this.radius = radius || 10;
+    this.radius = typeof radius === 'number' ? radius : 10;
     this._a = Vector.create();
     this._b = Vector.create();
     this.a = Vector.create();
@@ -92,8 +96,10 @@
       context.moveTo(this.a.x, this.a.y);
       context.lineTo(this.b.x, this.b.y);
       context.stroke();
-      this.drawFoot(context, this.a);
-      this.drawFoot(context, this.b);
+      if (this.radius > 0) {
+        this.drawFoot(context, this.a);
+        this.drawFoot(context, this.b);
+      }
     }
   };
 
@@ -104,7 +110,10 @@
   //----------------------------------------
 
   var Deck = function(rpm) {
-    this.mtm = 1 / 1000 / 60;
+    this.cord = new Cord(0);
+    this.touch = Vector.create();
+    this.rim = Vector.create();
+    this.mtm = 1 / 60 / 1000;
     this.rpm = rpm || 33;
     this.rimRadius = 0;
     this.pinRadius = 0;
@@ -113,7 +122,19 @@
     this.y = 0;
   };
   Deck.prototype = {
-    update: function(time) {
+    update: function(delta, mouse) {
+      if (mouse.down) {
+        Vector.subtract(this.touch, mouse, this);
+        delta = Math.atan2(this.touch.y, this.touch.x) - this.touch.angle;
+        this.rotation = this.touch.rotation + delta;
+      } else {
+        this.rotation += delta * this.mtm * this.rpm * TWO_PI;
+      }
+    },
+    store: function(mouse) {
+      Vector.subtract(this.touch, mouse, this);
+      this.touch.angle = Math.atan2(this.touch.y, this.touch.x);
+      this.touch.rotation = this.rotation;
     },
     draw: function(context) {
       // Rim
@@ -125,10 +146,11 @@
       context.arc(this.x, this.y, this.pinRadius, 0, TWO_PI, false);
       context.stroke();
       // Cord
-      // context.beginPath();
-      // context.moveTo.apply(this, this.polar(this.deck.rotation, this.deck.pin, this.deck.x, this.deck.y));
-      // context.lineTo.apply(this, this.polar(this.deck.rotation, this.deck.radius * 1, this.deck.x, this.deck.y));
-      // context.stroke();
+      Vector.set(this.rim, this.rimRadius, 0);
+      Vector.rotate(this.cord.b, this.rim, this.rotation);
+      Vector.add(this.cord.b, this, this.cord.b);
+      Vector.copy(this.cord.a, this);
+      this.cord.draw(context);
     }
   };
 
@@ -210,6 +232,7 @@
     update: function() {
       Vector.copy(this.mouse.cord.a, this.deck);
       Vector.copy(this.mouse.cord.b, this.mouse);
+      this.deck.update(this.dt, this.mouse);
     },
 
     draw: function() {
@@ -219,18 +242,19 @@
       this.deck.draw(this);
 
       // MOUSE
-      if (this.dragging) {
+      if (this.mouse.down) {
         this.strokeStyle = this.palette.west[2];
         this.mouse.cord.draw(this);
       }
     },
 
     mousedown: function() {
-      this.dragging = true;
+      this.deck.store(this.mouse);
+      this.mouse.down = true;
     },
 
     mouseup: function() {
-      this.dragging = false;
+      this.mouse.down = false;
     },
 
     hit: function(x, y, hx, hy, hw, hh) {
