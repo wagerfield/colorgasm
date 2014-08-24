@@ -36,6 +36,8 @@
     FastClick.attach(document.body);
     SC.initialize({client_id: CLIENT_ID});
 
+    stage.style.backgroundColor = '#1E1A31';
+
     // Add event listeners
     stage.addEventListener('touchmove', onInteractionEvent);
     stage.addEventListener('mousedown', onInteractionEvent);
@@ -50,7 +52,7 @@
 
     // Call internal methods
     // resolveURL(TRACKS[2]);
-    loadAudio('assets/sounds/crystalizabeths.mp3');
+    // loadAudio('assets/sounds/crystalizabeths.mp3');
   }
 
   function resolveURL(url) {
@@ -156,7 +158,7 @@
       case 'click':
         if (DECODED) {
           if (!audio.playing) {
-            play(0, false);
+            // play(0, false);
           }
           // if (audio.playing) {
           //   stop();
@@ -187,6 +189,11 @@
     // retina: window.devicePixelRatio > 1,
 
     setup: function() {
+      this.ts = 1 / 1000 / 60;
+      this.deck = {
+        rotation: 0,
+        rpm: 33
+      };
       this.mouse.down = {
         minX:0,
         maxX:0,
@@ -206,6 +213,10 @@
     },
 
     update: function() {
+      this.deck.rotation += this.dt * this.ts * this.deck.rpm * TWO_PI;
+
+
+
       this.mouse.down.dx = this.mouse.x - this.mouse.down.x;
       this.mouse.down.dy = this.mouse.y - this.mouse.down.y;
       this.mouse.move.dx = this.mouse.x - this.mouse.move.ox;
@@ -220,30 +231,43 @@
         // ratioY = Math.max(ratioY,-1);
         // ratioY = Math.min(ratioY, 1);
         // audio.source.playbackRate.value = 1 + ratio;
-        var delta = audio.context.currentTime - audio.startTime;
-        var offset = audio.scratch * -this.mouse.move.dy;
-        if (offset !== 0) {
-          console.log(offset);
-          play(audio.offsetTime + delta + offset, false);
-        }
+        // var delta = audio.context.currentTime - audio.startTime;
+        // var offset = audio.scratch * -this.mouse.move.dy;
+        // if (offset !== 0) {
+        //   console.log(offset);
+        //   play(audio.offsetTime + delta + offset, false);
+        // }
       }
     },
 
+    resize: function() {
+      this.cx = Math.round(this.width/2);
+      this.cy = Math.round(this.height/2);
+    },
+
     draw: function() {
-      if (DECODED) {
-        this.beginPath();
-        this.fillStyle = '#1E1A31';
-        this.fillRect(0, 0, this.width, this.height);
-      }
-      if (this.dragging) {
-        this.beginPath();
-        this.moveTo(this.mouse.down.x, this.mouse.down.y);
-        this.lineTo(this.mouse.x, this.mouse.down.y);
-        this.lineTo(this.mouse.x, this.mouse.y);
-        this.strokeStyle = '#F98A75';
-        this.lineWidth = 2;
-        this.stroke();
-      }
+      // this.save();
+      // this.translate(this.width/2, this.height/2);
+      // this.rotate(this.deck.rotation);
+      this.beginPath();
+      this.arc(this.cx, this.cy, 100, this.deck.rotation, this.deck.rotation + TWO_PI, false);
+      this.lineTo(this.cx, this.cy);
+      this.strokeStyle = '#B14B77';
+      this.stroke();
+      // if (DECODED) {
+      //   this.beginPath();
+      //   this.fillStyle = '#1E1A31';
+      //   this.fillRect(0, 0, this.width, this.height);
+      // }
+      // if (this.dragging) {
+      //   this.beginPath();
+      //   this.moveTo(this.mouse.down.x, this.mouse.down.y);
+      //   this.lineTo(this.mouse.x, this.mouse.down.y);
+      //   this.lineTo(this.mouse.x, this.mouse.y);
+      //   this.strokeStyle = '#F98A75';
+      //   this.lineWidth = 2;
+      //   this.stroke();
+      // }
     },
 
     mousedown: function() {
