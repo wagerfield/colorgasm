@@ -118,17 +118,25 @@
     this.rimRadius = 0;
     this.pinRadius = 0;
     this.rotation = 0;
+    this.velocity = 0;
+    this.on = false;
     this.x = 0;
     this.y = 0;
+    this.old = {
+      rotation: 0,
+      velocity: 0
+    };
   };
   Deck.prototype = {
     update: function(delta, mouse) {
       if (mouse.down) {
         Vector.subtract(this.touch, mouse, this);
-        delta = Math.atan2(this.touch.y, this.touch.x) - this.touch.angle;
-        this.rotation = this.touch.rotation + delta;
+        var angle = Math.atan2(this.touch.y, this.touch.x) - this.touch.angle;
+        this.rotation = this.touch.rotation + angle;
       } else {
-        this.rotation += delta * this.mtm * this.rpm * TWO_PI;
+        if (this.on) {
+          this.rotation += delta * this.mtm * this.rpm * TWO_PI;
+        }
       }
     },
     store: function(mouse) {
@@ -205,6 +213,15 @@
         '#4D64B0',
         '#4C4690'
       ]));
+      this.setupGUI();
+    },
+
+    setupGUI: function() {
+      this.gui = new dat.GUI();
+      this.deck.folder = this.gui.addFolder('Deck');
+      this.deck.folder.open();
+      this.deck.folder.add(this.deck, 'on');
+      this.deck.folder.add(this.deck, 'rpm', 1, 120);
     },
 
     setColorPalette: function(palette) {
@@ -218,14 +235,15 @@
       this.centerX = Math.round(this.width * 0.5);
       this.centerY = Math.round(this.height * 0.5);
 
-      // Position and resize deck
-      this.deck.x = this.centerX;
-      this.deck.y = this.centerY;
+      // Resize and position deck
       this.deck.rimRadius = Math.round(Math.min(this.centerX, this.centerY) * 0.7);
       this.deck.pinRadius = Math.round(this.deck.rimRadius * 0.05);
+      this.deck.x = this.centerX;
+      this.deck.y = this.centerY;
 
       // Resize mouse cord
       this.mouse.cord.radius = this.deck.pinRadius;
+      this.mouse.down = false;
       this.draw();
     },
 
