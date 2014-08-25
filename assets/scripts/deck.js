@@ -2,8 +2,8 @@
 
   var Deck = function(rpm, radius, mass) {
 
-    // 12" === 30cm === 0.3m
-    this.radius = radius || 0.3;
+    // 12" === 30cm === 0.3m (0.15m radius)
+    this.radius = radius || 0.15;
     this.rpm = rpm || 100/3;
 
     // Touch Vectors
@@ -21,6 +21,7 @@
 
     // Modifiers
     this.rotation = 0;
+    this.speed = 0;
     this.on = false;
 
     // Physics
@@ -28,7 +29,7 @@
     this.torque = 0;
 
     // Setup
-    this.setMass(mass || 1);
+    this.setMass(mass || 2);
     this.setPosition(0, 0);
     this.setSize(5, 100);
   };
@@ -50,7 +51,10 @@
     target: function(value, time) {
     },
     update: function(delta, mouse) {
+
+      // Reset torque
       this.torque = 0;
+
       if (mouse.down) {
 
         // Deck center > mouse
@@ -69,13 +73,13 @@
         this.touch.length = Vector.length(this.touch);
 
         // Calculate touch scalar
-        this.touch.scalar = this.touch.length / this.rimRadius;
+        this.touch.scalar = this.touch.length / this.rimRadius * this.radius;
 
         // Calculate delta length
         this.touch.delta.length = Vector.length(this.touch.delta);
 
         // Calculate delta scalar
-        this.touch.delta.scalar = 1;
+        this.touch.delta.scalar = this.touch.delta.length / this.touch.length * this.touch.scalar;
 
         // Scale radius vector
         Vector.normalise(this.touch.radius, this.touch, this.touch.scalar);
@@ -84,7 +88,7 @@
         Vector.normalise(this.touch.force, this.touch.delta, this.touch.delta.scalar);
 
         // Calculate torque
-        this.torque += Vector.cross(this.touch.radius, this.touch.force) * 0.0001;
+        this.torque += Vector.cross(this.touch.radius, this.touch.force);
 
       } else {
         if (this.on) {
@@ -96,6 +100,7 @@
       this.torque *= this.inverseMass;
       this.velocity += this.torque * delta;
       this.rotation += this.velocity * TWO_PI;
+      this.speed = 0;
     },
     store: function(mouse) {
       Vector.subtract(this.touch, mouse, this);
