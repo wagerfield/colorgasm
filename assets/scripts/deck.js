@@ -6,10 +6,11 @@
     this.radius = radius || 0.15;
     this.rpm = rpm || 100/3;
 
+    this.i = Vector.create();
+
     // Touch Vectors
     this.touch = Vector.create();
     this.touch.radius = Vector.create();
-    this.touch.force = Vector.create();
     this.touch.store = Vector.create();
     this.touch.delta = Vector.create();
     this.touch.cord = new Cord(0);
@@ -56,11 +57,11 @@
       // Reset torque
       this.torque = 0;
 
-      // Scratch torque
+      // Scratch velocity
       if (mouse.down) {
 
         // Set lubricity
-        this.lubricity = 0.3;
+        this.lubricity = 1.00;
 
         // Deck center > mouse
         Vector.subtract(this.touch, mouse, this);
@@ -68,35 +69,32 @@
         // Clamp to deck rim radius
         Vector.clamp(this.touch, this.touch, this.pinRadius, this.rimRadius);
 
-        // Calculate delta
-        Vector.subtract(this.touch.delta, this.touch, this.touch.store);
-
-        // Store touch
-        Vector.copy(this.touch.store, this.touch);
-
         // Calculate touch length
         this.touch.length = Vector.length(this.touch);
 
         // Calculate touch scalar
-        this.touch.scalar = this.touch.length / this.rimRadius * this.radius;
+        this.touch.scalar = this.touch.length / this.rimRadius;
 
-        // Calculate delta length
-        this.touch.delta.length = Vector.length(this.touch.delta);
+        // Calculate touch circumference  (C = 2πr)
+        this.touch.circumference = this.touch.length * Math.PI2;
 
-        // Calculate delta scalar
-        this.touch.delta.scalar = this.touch.delta.length / this.touch.length * this.touch.scalar;
+        // Scale store length to touch length
+        Vector.normalise(this.touch.store, this.touch.store, this.touch.length);
 
-        // Scale radius vector
+        // Calculate delta
+        Vector.subtract(this.touch.delta, this.touch, this.touch.store);
+
+        // Calculate radius
         Vector.normalise(this.touch.radius, this.touch, this.touch.scalar);
 
-        // Scale force vector
-        Vector.normalise(this.touch.force, this.touch.delta, this.touch.delta.scalar);
+        // Store touch
+        Vector.copy(this.touch.store, this.touch);
 
         // Calculate touch torque
-        this.touch.torque = Vector.cross(this.touch.radius, this.touch.force);
+        this.touch.torque = Vector.cross(this.touch.radius, this.touch.delta);
 
-        // Add touch torque
-        this.torque += this.touch.torque;
+        // Calculate velocity
+        this.velocity = this.touch.torque / this.touch.circumference;
 
       } else {
 
@@ -104,19 +102,24 @@
         if (this.on) {
 
           // Set lubricity
-          this.lubricity = 1.0;
+          this.lubricity = 1.00;
 
         // Friction torque
         } else {
 
           // Set lubricity
-          this.lubricity = 0.93;
+          this.lubricity = 0.95;
         }
       }
+
+      // Integrate motion
       this.torque *= this.inverseMass;
       this.velocity += this.torque * delta;
       this.velocity *= this.lubricity;
       this.rotation += this.velocity * TWO_PI;
+
+      // Calculate speed
+      this.speed = 0;
     },
     store: function(mouse) {
       Vector.subtract(this.touch, mouse, this);
