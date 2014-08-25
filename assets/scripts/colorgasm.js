@@ -1,6 +1,23 @@
 (function(window, globalID) {
 
   //----------------------------------------
+  // Math
+  //----------------------------------------
+
+  Math.PIH = Math.PI / 2;
+  Math.PI2 = Math.PI * 2;
+  Math.PIR = Math.PI / 180;
+  Math.PID = 180 / Math.PI;
+  Math.rtd = function(radians) {
+    return radians * Math.PID;
+  };
+  Math.dtr = function(degrees) {
+    return degrees * Math.PIR;
+  };
+
+
+
+  //----------------------------------------
   // Vector
   //----------------------------------------
 
@@ -138,6 +155,7 @@
           this.rotation += delta * this.mtm * this.rpm * TWO_PI;
         }
       }
+      // console.log(Math.rtd(this.rotation));
     },
     store: function(mouse) {
       Vector.subtract(this.touch, mouse, this);
