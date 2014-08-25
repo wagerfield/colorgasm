@@ -51,8 +51,14 @@
       return target;
     },
     clamp: function(target, a, min, max) {
-      this.min(target, a, min);
-      this.max(target, a, max);
+      var length = this.length(a);
+      if (length < min) {
+        this.normalise(target, a, min);
+      } else if (length > max) {
+        this.normalise(target, a, max);
+      } else {
+        this.copy(target, a);
+      }
       return target;
     },
     squaredLength: function(vector) {
