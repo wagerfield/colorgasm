@@ -28,26 +28,53 @@
     identity: function(target) {
       target.x = 0;
       target.y = 0;
+      return target;
     },
     copy: function(target, a) {
       target.x = a.x;
       target.y = a.y;
+      return target;
     },
     set: function(target, x, y) {
       target.x = x;
       target.y = y;
+      return target;
     },
     subtract: function(target, a, b) {
       target.x = a.x - b.x;
       target.y = a.y - b.y;
+      return target;
     },
     add: function(target, a, b) {
       target.x = a.x + b.x;
       target.y = a.y + b.y;
+      return target;
     },
     scale: function(target, a, s) {
       target.x = a.x * s;
       target.y = a.y * s;
+      return target;
+    },
+    min: function(target, a, length) {
+      if (this.length(a) < length) {
+        this.normalise(target, a, length);
+      } else {
+        this.copy(target, a);
+      }
+      return target;
+    },
+    max: function(target, a, length) {
+      if (this.length(a) > length) {
+        this.normalise(target, a, length);
+      } else {
+        this.copy(target, a);
+      }
+      return target;
+    },
+    clamp: function(target, a, min, max) {
+      this.min(target, a, min);
+      this.min(target, a, max);
+      return target;
     },
     squaredLength: function(vector) {
       var x = vector.x;
@@ -132,15 +159,15 @@
   // Deck
   //----------------------------------------
 
-  var Deck = function(rpm, radius) {
-    this.radius = radius || 100;
-    this.mtm = 1 / 60 / 1000;
+  var Deck = function(rpm, radius, mass) {
+    // 12" === 30cm === 0.3m
+    this.radius = radius || 0.3;
     this.rpm = rpm || 100/3;
 
     // Touch Vectors
     this.touch = Vector.create();
     this.touch.old = Vector.create();
-    this.touch.delta = Vector.create();
+    this.touch.force = Vector.create();
 
     // Sizing Vectors
     this.rim = Vector.create();
@@ -152,16 +179,17 @@
     this.on = false;
 
     // Physics
-    this.lubricity = 0.9;
     this.velocity = 0;
     this.torque = 0;
 
     // Setup
+    this.setMass(mass || 1);
     this.setPosition(0, 0);
     this.setSize(5, 100);
-    this.setMass(10);
   };
   Deck.prototype = {
+    // MILLISECOND > MINUTE
+    MTM: 1 / 60 / 1000,
     setPosition: function(x, y) {
       this.x = x;
       this.y = y;
@@ -173,24 +201,47 @@
     setMass: function(mass) {
       this.inverseMass = 1.0 / (this.mass = mass);
     },
+    target: function(value, time) {
+    },
     update: function(delta, mouse) {
       this.torque = 0;
       if (mouse.down) {
-        Vector.copy(this.touch.old, this.touch);
+
+        // normalise to physical radius
+
+
+        // Deck center > mouse
         Vector.subtract(this.touch, mouse, this);
-        Vector.subtract(this.touch.delta, this.touch.old, this.touch);
-        this.torque += Vector.cross(this.touch.delta, this.touch.old) * 0.0000001;
+
+        // Clamp to deck rim radius
+        Vector.max(this.touch, this.touch, this.rimRadius);
+
+        // Normalise to physical radius
+        // Vector.max(this.touch, this.touch, this.rimRadius);
+
+
+        // Vector.normalise(this.touch, this.touch, this);
+
+
+        // Vector.subtract(this.touch.force, this.touch.old, this.touch);
+
+
+        // this.torque += Vector.cross(this.touch.force, this.touch.old) * 0.0000001;
+
+        // Vector.copy(this.touch.old, this.touch);
       } else {
         if (this.on) {
+          // this.target(0, 2);
+        } else {
+          // this.target(0, 2);
         }
       }
       this.torque *= this.inverseMass;
       this.velocity += this.torque * delta;
-      // this.velocity *= this.lubricity;
       this.rotation += this.velocity * TWO_PI;
     },
     store: function(mouse) {
-      Vector.subtract(this.touch, mouse, this);
+      // Vector.subtract(this.touch, mouse, this);
     },
     draw: function(context) {
       // Rim
