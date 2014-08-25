@@ -80,6 +80,12 @@
         target.y = y;
         return target;
       }
+    },
+    cross: function(a, b) {
+      return a.x * b.y - a.y * b.x;
+    },
+    dot: function (a, b) {
+      return a.x * b.x + a.y * b.y;
     }
   };
 
@@ -126,61 +132,65 @@
   // Deck
   //----------------------------------------
 
-  var Deck = function(rpm) {
-    this.cord = new Cord(0);
-    this.touch = Vector.create();
-    this.rim = Vector.create();
+  var Deck = function(rpm, radius) {
+    this.radius = radius || 100;
     this.mtm = 1 / 60 / 1000;
-    this.rpm = rpm || 33;
-    this.rimRadius = 0;
-    this.pinRadius = 0;
+    this.rpm = rpm || 100/3;
+
+    // Touch Vectors
+    this.touch = Vector.create();
+    this.touch.old = Vector.create();
+    this.touch.delta = Vector.create();
+
+    // Sizing Vectors
+    this.rim = Vector.create();
+    this.pin = Vector.create();
+    this.cord = new Cord(0);
+
+    // Modifiers
     this.rotation = 0;
     this.on = false;
-    this.x = 0;
-    this.y = 0;
 
-    this.mass = 1;
-    this.inverseMass = 1 / this.mass;
-    this.force = 0;
-    // this.lubricity = 0.999;
+    // Physics
     this.lubricity = 0.9;
-    this.acceleration = 0;
     this.velocity = 0;
-    this.position = 0;
+    this.torque = 0;
+
+    // Setup
+    this.setPosition(0, 0);
+    this.setSize(5, 100);
+    this.setMass(10);
   };
   Deck.prototype = {
+    setPosition: function(x, y) {
+      this.x = x;
+      this.y = y;
+    },
+    setSize: function(pin, rim) {
+      Vector.set(this.pin, this.pinRadius = pin, 0);
+      Vector.set(this.rim, this.rimRadius = rim, 0);
+    },
+    setMass: function(mass) {
+      this.inverseMass = 1.0 / (this.mass = mass);
+    },
     update: function(delta, mouse) {
-
-      // this.force = 0;
-      this.velocity = 0;
-
+      this.torque = 0;
       if (mouse.down) {
+        Vector.copy(this.touch.old, this.touch);
         Vector.subtract(this.touch, mouse, this);
-        var touchAngle = Math.atan2(this.touch.y, this.touch.x);
-        console.log(Math.rtd(touchAngle));
-
-        // var angle = Math.atan2(this.touch.y, this.touch.x) - this.touch.angle;
-        // this.rotation = this.touch.rotation + angle;
+        Vector.subtract(this.touch.delta, this.touch.old, this.touch);
+        this.torque += Vector.cross(this.touch.delta, this.touch.old) * 0.0000001;
       } else {
         if (this.on) {
-          // this.rotation += delta * this.mtm * this.rpm * TWO_PI;
-          // this.force += 0.00001;
         }
       }
-
-      // this.acceleration = this.force * this.inverseMass;
-      // this.velocity += this.acceleration * delta;
+      this.torque *= this.inverseMass;
+      this.velocity += this.torque * delta;
       // this.velocity *= this.lubricity;
-      // this.position += this.velocity;
-      // this.rotation = this.position * TWO_PI;
-
-      // console.log(this.position);
-      // console.log(Math.rtd(this.rotation));
+      this.rotation += this.velocity * TWO_PI;
     },
     store: function(mouse) {
       Vector.subtract(this.touch, mouse, this);
-      this.touch.angle = Math.atan2(this.touch.y, this.touch.x);
-      this.touch.rotation = this.rotation;
     },
     draw: function(context) {
       // Rim
@@ -192,10 +202,10 @@
       context.arc(this.x, this.y, this.pinRadius, 0, TWO_PI, false);
       context.stroke();
       // Cord
-      Vector.set(this.rim, this.rimRadius, 0);
+      Vector.rotate(this.cord.a, this.pin, this.rotation);
       Vector.rotate(this.cord.b, this.rim, this.rotation);
+      Vector.add(this.cord.a, this, this.cord.a);
       Vector.add(this.cord.b, this, this.cord.b);
-      Vector.copy(this.cord.a, this);
       this.cord.draw(context);
     }
   };
@@ -259,7 +269,7 @@
       this.deck.folder = this.gui.addFolder('Deck');
       this.deck.folder.open();
       this.deck.folder.add(this.deck, 'on');
-      this.deck.folder.add(this.deck, 'rpm', 1, 120);
+      this.deck.folder.add(this.deck, 'rpm', 10, 80);
     },
 
     setColorPalette: function(palette) {
@@ -274,10 +284,9 @@
       this.centerY = Math.round(this.height * 0.5);
 
       // Resize and position deck
-      this.deck.rimRadius = Math.round(Math.min(this.centerX, this.centerY) * 0.7);
-      this.deck.pinRadius = Math.round(this.deck.rimRadius * 0.05);
-      this.deck.x = this.centerX;
-      this.deck.y = this.centerY;
+      var radius = Math.round(Math.min(this.centerX, this.centerY) * 0.7);
+      this.deck.setPosition(this.centerX, this.centerY);
+      this.deck.setSize(Math.round(radius * 0.05), radius);
 
       // Resize mouse cord
       this.mouse.cord.radius = this.deck.pinRadius;
