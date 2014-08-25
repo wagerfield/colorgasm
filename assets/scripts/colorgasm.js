@@ -25,6 +25,7 @@
 
   window[globalID] = Sketch.create({
 
+    // retina: window.devicePixelRatio > 1,
     container: document.getElementById('stage'),
 
     setup: function() {
@@ -57,6 +58,7 @@
       this.deck.folder.open();
       this.deck.folder.add(this.deck, 'on');
       this.deck.folder.add(this.deck, 'rpm', 10, 80);
+      this.deck.folder.add(this.deck, 'lubricity', 0, 1);
     },
 
     setColorPalette: function(palette) {

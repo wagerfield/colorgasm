@@ -25,11 +25,12 @@
     this.on = false;
 
     // Physics
+    this.lubricity = 1;
     this.velocity = 0;
     this.torque = 0;
 
     // Setup
-    this.setMass(mass || 2);
+    this.setMass(mass || 1);
     this.setPosition(0, 0);
     this.setSize(5, 100);
   };
@@ -55,7 +56,11 @@
       // Reset torque
       this.torque = 0;
 
+      // Scratch torque
       if (mouse.down) {
+
+        // Set lubricity
+        this.lubricity = 0.3;
 
         // Deck center > mouse
         Vector.subtract(this.touch, mouse, this);
@@ -87,20 +92,31 @@
         // Scale force vector
         Vector.normalise(this.touch.force, this.touch.delta, this.touch.delta.scalar);
 
-        // Calculate torque
-        this.torque += Vector.cross(this.touch.radius, this.touch.force);
+        // Calculate touch torque
+        this.touch.torque = Vector.cross(this.touch.radius, this.touch.force);
+
+        // Add touch torque
+        this.torque += this.touch.torque;
 
       } else {
+
+        // Motor torque
         if (this.on) {
-          // this.target(0, 2);
+
+          // Set lubricity
+          this.lubricity = 1.0;
+
+        // Friction torque
         } else {
-          // this.target(0, 2);
+
+          // Set lubricity
+          this.lubricity = 0.93;
         }
       }
       this.torque *= this.inverseMass;
       this.velocity += this.torque * delta;
+      this.velocity *= this.lubricity;
       this.rotation += this.velocity * TWO_PI;
-      this.speed = 0;
     },
     store: function(mouse) {
       Vector.subtract(this.touch, mouse, this);
