@@ -135,26 +135,46 @@
     this.rimRadius = 0;
     this.pinRadius = 0;
     this.rotation = 0;
-    this.velocity = 0;
     this.on = false;
     this.x = 0;
     this.y = 0;
-    this.old = {
-      rotation: 0,
-      velocity: 0
-    };
+
+    this.mass = 1;
+    this.inverseMass = 1 / this.mass;
+    this.force = 0;
+    // this.lubricity = 0.999;
+    this.lubricity = 0.9;
+    this.acceleration = 0;
+    this.velocity = 0;
+    this.position = 0;
   };
   Deck.prototype = {
     update: function(delta, mouse) {
+
+      // this.force = 0;
+      this.velocity = 0;
+
       if (mouse.down) {
         Vector.subtract(this.touch, mouse, this);
-        var angle = Math.atan2(this.touch.y, this.touch.x) - this.touch.angle;
-        this.rotation = this.touch.rotation + angle;
+        var touchAngle = Math.atan2(this.touch.y, this.touch.x);
+        console.log(Math.rtd(touchAngle));
+
+        // var angle = Math.atan2(this.touch.y, this.touch.x) - this.touch.angle;
+        // this.rotation = this.touch.rotation + angle;
       } else {
         if (this.on) {
-          this.rotation += delta * this.mtm * this.rpm * TWO_PI;
+          // this.rotation += delta * this.mtm * this.rpm * TWO_PI;
+          // this.force += 0.00001;
         }
       }
+
+      // this.acceleration = this.force * this.inverseMass;
+      // this.velocity += this.acceleration * delta;
+      // this.velocity *= this.lubricity;
+      // this.position += this.velocity;
+      // this.rotation = this.position * TWO_PI;
+
+      // console.log(this.position);
       // console.log(Math.rtd(this.rotation));
     },
     store: function(mouse) {
@@ -285,11 +305,13 @@
     },
 
     mousedown: function() {
+      this.container.classList.add('grabbing');
       this.deck.store(this.mouse);
       this.mouse.down = true;
     },
 
     mouseup: function() {
+      this.container.classList.remove('grabbing');
       this.mouse.down = false;
     },
 

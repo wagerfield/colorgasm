@@ -13,3 +13,13 @@ canvas {
   left: 0;
   top: 0;
 }
+
+.grab {
+  cursor: -webkit-grab;
+  cursor: grab;
+}
+
+.grabbing {
+  cursor: -webkit-grabbing;
+  cursor: grabbing;
+}
