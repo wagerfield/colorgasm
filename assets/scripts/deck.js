@@ -10,6 +10,7 @@
     this.touch = Vector.create();
     this.touch.old = Vector.create();
     this.touch.force = Vector.create();
+    this.touch.cord = new Cord(0);
 
     // Sizing Vectors
     this.rim = Vector.create();
@@ -56,7 +57,7 @@
         Vector.subtract(this.touch, mouse, this);
 
         // Clamp to deck rim radius
-        Vector.max(this.touch, this.touch, this.rimRadius);
+        Vector.clamp(this.touch, this.touch, this.pinRadius, this.rimRadius);
 
         // Normalise to physical radius
         // Vector.max(this.touch, this.touch, this.rimRadius);
@@ -100,6 +101,10 @@
       Vector.add(this.cord.a, this, this.cord.a);
       Vector.add(this.cord.b, this, this.cord.b);
       this.cord.draw(context);
+      // Touch
+      Vector.copy(this.touch.cord.a, this);
+      Vector.add(this.touch.cord.b, this, this.touch);
+      this.touch.cord.draw(context);
     }
   };
 

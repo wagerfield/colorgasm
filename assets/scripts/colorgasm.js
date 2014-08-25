@@ -74,7 +74,7 @@
       // Resize and position deck
       var radius = Math.round(Math.min(this.centerX, this.centerY) * 0.7);
       this.deck.setPosition(this.centerX, this.centerY);
-      this.deck.setSize(Math.round(radius * 0.05), radius);
+      this.deck.setSize(10, radius);
 
       // Resize mouse cord
       this.mouse.cord.radius = this.deck.pinRadius;
@@ -97,7 +97,7 @@
       // MOUSE
       if (this.mouse.down) {
         this.strokeStyle = this.palette.west[2];
-        this.mouse.cord.draw(this);
+        // this.mouse.cord.draw(this);
       }
     },
 

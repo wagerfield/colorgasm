@@ -52,7 +52,7 @@
     },
     clamp: function(target, a, min, max) {
       this.min(target, a, min);
-      this.min(target, a, max);
+      this.max(target, a, max);
       return target;
     },
     squaredLength: function(vector) {
