@@ -29,7 +29,6 @@
 
     setup: function() {
       this.deck = new Deck();
-      this.mouse.cord = new Cord(20);
       this.colorgasm = new Colorgasm();
       this.setColorPalette(this.colorgasm.setColorPalette('main',
         '#1E1A31', // Base
@@ -76,15 +75,12 @@
       this.deck.setPosition(this.centerX, this.centerY);
       this.deck.setSize(10, radius);
 
-      // Resize mouse cord
-      this.mouse.cord.radius = this.deck.pinRadius;
+      // Reset mouse
       this.mouse.down = false;
       this.draw();
     },
 
     update: function() {
-      Vector.copy(this.mouse.cord.a, this.deck);
-      Vector.copy(this.mouse.cord.b, this.mouse);
       this.deck.update(this.dt, this.mouse);
     },
 
@@ -96,8 +92,8 @@
 
       // MOUSE
       if (this.mouse.down) {
-        this.strokeStyle = this.palette.west[2];
-        // this.mouse.cord.draw(this);
+        this.strokeStyle = this.palette.east[1];
+        this.deck.touch.cord.draw(this);
       }
     },
 

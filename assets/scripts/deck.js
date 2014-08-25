@@ -8,8 +8,10 @@
 
     // Touch Vectors
     this.touch = Vector.create();
-    this.touch.old = Vector.create();
+    this.touch.radius = Vector.create();
     this.touch.force = Vector.create();
+    this.touch.store = Vector.create();
+    this.touch.delta = Vector.create();
     this.touch.cord = new Cord(0);
 
     // Sizing Vectors
@@ -40,6 +42,7 @@
     setSize: function(pin, rim) {
       Vector.set(this.pin, this.pinRadius = pin, 0);
       Vector.set(this.rim, this.rimRadius = rim, 0);
+      this.touch.cord.radius = this.pinRadius;
     },
     setMass: function(mass) {
       this.inverseMass = 1.0 / (this.mass = mass);
@@ -50,28 +53,39 @@
       this.torque = 0;
       if (mouse.down) {
 
-        // normalise to physical radius
-
-
         // Deck center > mouse
         Vector.subtract(this.touch, mouse, this);
 
         // Clamp to deck rim radius
         Vector.clamp(this.touch, this.touch, this.pinRadius, this.rimRadius);
 
-        // Normalise to physical radius
-        // Vector.max(this.touch, this.touch, this.rimRadius);
+        // Calculate delta
+        Vector.subtract(this.touch.delta, this.touch, this.touch.store);
 
+        // Store touch
+        Vector.copy(this.touch.store, this.touch);
 
-        // Vector.normalise(this.touch, this.touch, this);
+        // Calculate touch length
+        this.touch.length = Vector.length(this.touch);
 
+        // Calculate touch scalar
+        this.touch.scalar = this.touch.length / this.rimRadius;
 
-        // Vector.subtract(this.touch.force, this.touch.old, this.touch);
+        // Calculate delta length
+        this.touch.delta.length = Vector.length(this.touch.delta);
 
+        // Calculate delta scalar
+        this.touch.delta.scalar = 1;
 
-        // this.torque += Vector.cross(this.touch.force, this.touch.old) * 0.0000001;
+        // Scale radius vector
+        Vector.normalise(this.touch.radius, this.touch, this.touch.scalar);
 
-        // Vector.copy(this.touch.old, this.touch);
+        // Scale force vector
+        Vector.normalise(this.touch.force, this.touch.delta, this.touch.delta.scalar);
+
+        // Calculate torque
+        this.torque += Vector.cross(this.touch.radius, this.touch.force) * 0.0001;
+
       } else {
         if (this.on) {
           // this.target(0, 2);
@@ -84,7 +98,8 @@
       this.rotation += this.velocity * TWO_PI;
     },
     store: function(mouse) {
-      // Vector.subtract(this.touch, mouse, this);
+      Vector.subtract(this.touch, mouse, this);
+      Vector.copy(this.touch.store, this.touch);
     },
     draw: function(context) {
       // Rim
@@ -104,7 +119,6 @@
       // Touch
       Vector.copy(this.touch.cord.a, this);
       Vector.add(this.touch.cord.b, this, this.touch);
-      this.touch.cord.draw(context);
     }
   };
 
