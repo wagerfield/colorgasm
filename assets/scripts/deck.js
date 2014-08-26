@@ -28,6 +28,7 @@
     // Physics
     this.lubricity = 1;
     this.velocity = 0;
+    this.momentum = 0;
     this.torque = 0;
 
     // Setup
@@ -57,11 +58,11 @@
       // Reset torque
       this.torque = 0;
 
+      // Set lubricity
+      this.lubricity = 1;
+
       // Scratch velocity
       if (mouse.down) {
-
-        // Set lubricity
-        this.lubricity = 1.00;
 
         // Deck center > mouse
         Vector.subtract(this.touch, mouse, this);
@@ -101,14 +102,11 @@
         // Motor torque
         if (this.on) {
 
-          // Set lubricity
-          this.lubricity = 1.00;
-
         // Friction torque
         } else {
 
           // Set lubricity
-          this.lubricity = 0.95;
+          this.lubricity = 0.94;
         }
       }
 
@@ -116,14 +114,17 @@
       this.torque *= this.inverseMass;
       this.velocity += this.torque * delta;
       this.velocity *= this.lubricity;
+      this.momentum = this.velocity * this.mass;
       this.rotation += this.velocity * TWO_PI;
 
       // Calculate speed
       this.speed = 0;
     },
-    store: function(mouse) {
+    mousedown: function(mouse) {
       Vector.subtract(this.touch, mouse, this);
       Vector.copy(this.touch.store, this.touch);
+    },
+    mouseup: function(mouse) {
     },
     draw: function(context) {
       // Rim

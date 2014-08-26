@@ -58,7 +58,6 @@
       this.deck.folder.open();
       this.deck.folder.add(this.deck, 'on');
       this.deck.folder.add(this.deck, 'rpm', 10, 80);
-      this.deck.folder.add(this.deck, 'lubricity', 0, 1);
     },
 
     setColorPalette: function(palette) {
@@ -94,19 +93,20 @@
 
       // MOUSE
       if (this.mouse.down) {
-        this.strokeStyle = this.palette.east[1];
+        this.strokeStyle = this.palette.east[2];
         this.deck.touch.cord.draw(this);
       }
     },
 
     mousedown: function() {
       this.container.classList.add('grabbing');
-      this.deck.store(this.mouse);
+      this.deck.mousedown(this.mouse);
       this.mouse.down = true;
     },
 
     mouseup: function() {
       this.container.classList.remove('grabbing');
+      this.deck.mouseup(this.mouse);
       this.mouse.down = false;
     },
 
